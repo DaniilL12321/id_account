@@ -306,7 +306,7 @@ export default function HomeScreen() {
   }, []);
 
   const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = { 
+    const options: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'long',
       weekday: 'long'
@@ -315,7 +315,7 @@ export default function HomeScreen() {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ru-RU', { 
+    return date.toLocaleTimeString('ru-RU', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -393,7 +393,7 @@ export default function HomeScreen() {
               <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
                 {stats.averageGrade.toFixed(1)}
               </ThemedText>
-              <ThemedText 
+              <ThemedText
                 style={[styles.statLabel, { color: theme.secondaryText }]}
                 adjustsFontSizeToFit
                 numberOfLines={1}
@@ -408,7 +408,7 @@ export default function HomeScreen() {
               <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
                 {stats.completedCount}
               </ThemedText>
-              <ThemedText 
+              <ThemedText
                 style={[styles.statLabel, { color: theme.secondaryText }]}
                 adjustsFontSizeToFit
                 numberOfLines={1}
@@ -423,7 +423,7 @@ export default function HomeScreen() {
               <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
                 {stats.debtsCount}
               </ThemedText>
-              <ThemedText 
+              <ThemedText
                 style={[styles.statLabel, { color: theme.secondaryText }]}
                 adjustsFontSizeToFit
                 numberOfLines={1}
@@ -437,9 +437,14 @@ export default function HomeScreen() {
 
         <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
           <ThemedView style={styles.cardHeader}>
-            <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
-              Расписание
-            </ThemedText>
+            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+                Расписание
+              </ThemedText>
+              <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                • {userInfo?.groupName}
+              </ThemedText>
+            </ThemedView>
             <TouchableOpacity>
               <ThemedText style={{ color: theme.accentColor }}>
                 Всё расписание
@@ -488,7 +493,7 @@ export default function HomeScreen() {
           <ThemedView style={styles.scheduleList}>
             {currentSchedule.length === 0 ? (
               <ThemedText style={{ color: theme.secondaryText, textAlign: 'center', padding: 16 }}>
-                Пар нет
+                {`${DAY_LABELS[selectedDay]} пар нет`}
               </ThemedText>
             ) : (
               currentSchedule.map((lesson, index) => {
@@ -823,6 +828,9 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     textAlign: 'center',
+    fontSize: 13,
+  },
+  groupText: {
     fontSize: 13,
   },
 });
