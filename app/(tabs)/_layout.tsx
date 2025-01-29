@@ -6,24 +6,33 @@ import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/app/context/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { isDarkMode, themeMode } = useTheme();
+  const colorScheme = isDarkMode ? 'dark' : 'light';
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarInactiveTintColor: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
-          default: {},
-        }),
+        tabBarBackground: Platform.OS === 'ios' ? TabBarBackground : undefined,
+        tabBarStyle: {
+          backgroundColor: themeMode === 'system' 
+            ? (isDarkMode ? '#000000' : '#FFFFFF')
+            : themeMode === 'dark' ? '#000000' : '#FFFFFF',
+          borderTopWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+          ...Platform.select({
+            ios: {
+              position: 'absolute',
+            },
+          }),
+        },
       }}>
       <Tabs.Screen
         name="index"

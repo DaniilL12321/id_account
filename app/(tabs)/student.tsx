@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, ScrollView, useColorScheme, SafeAreaView, Image, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { CheckResponse, UserDetailsResponse } from '@/types/api';
 import Constants from 'expo-constants';
+import { useTheme } from '@/app/context/theme';
 
 const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
@@ -37,19 +38,18 @@ interface ThemeConfig {
 }
 
 export default function StudentProfileScreen() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const [userInfo, setUserInfo] = useState<CheckResponse['auth_info']['user'] | null>(null);
-  const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
+  const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<CheckResponse['auth_info']['user'] | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
 
-  const theme: ThemeConfig = {
-    background: isDark ? '#000000' : '#F2F3F7',
-    cardBackground: isDark ? '#1D1D1D' : '#FFFFFF',
-    textColor: isDark ? '#FFFFFF' : '#000000',
-    secondaryText: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+  const theme = {
+    background: isDarkMode ? '#000000' : '#F2F3F7',
+    cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
+    textColor: isDarkMode ? '#FFFFFF' : '#000000',
+    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
   };
 
