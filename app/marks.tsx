@@ -119,7 +119,16 @@ function MarksContent() {
     return theme.gray;
   };
 
-  const filteredMarks = marks.filter(mark => mark.semester === selectedSemester);
+  const filteredMarks = marks
+    .filter(mark => mark.semester === selectedSemester)
+    .sort((a, b) => {
+      // Если оценка не проставлена (markName === null), она должна быть в начале
+      if (a.markName === null && b.markName !== null) return -1;
+      if (a.markName !== null && b.markName === null) return 1;
+      
+      // Сортировка по убыванию оценок
+      return b.mark - a.mark;
+    });
   const averageGrade = calculateAverageGrade(marks);
 
   if (loading) {
@@ -144,7 +153,7 @@ function MarksContent() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <ScrollView 
+      <ScrollView
         style={[styles.container, { backgroundColor: theme.background }]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -169,8 +178,8 @@ function MarksContent() {
           </ThemedView>
         </ThemedView>
 
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.semesterScroll}
           contentContainerStyle={styles.semesterContainer}
@@ -180,7 +189,7 @@ function MarksContent() {
               key={semester}
               style={[
                 styles.semesterButton,
-                { 
+                {
                   backgroundColor: selectedSemester === semester ? theme.accentColor : theme.cardBackground,
                 },
               ]}
@@ -200,7 +209,7 @@ function MarksContent() {
 
         <View style={styles.marksList}>
           {filteredMarks.map((mark, index) => (
-            <ThemedView 
+            <ThemedView
               key={index}
               style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
             >
@@ -212,7 +221,7 @@ function MarksContent() {
                   {mark.controlTypeName}
                 </ThemedText>
               </View>
-              <View 
+              <View
                 style={[
                   styles.markBadge,
                   { backgroundColor: getMarkColor(mark) }

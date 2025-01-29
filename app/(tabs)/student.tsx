@@ -186,9 +186,9 @@ export default function StudentProfileScreen() {
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Справки
             </ThemedText>
-            <ThemedView style={styles.badge}>
+            {/* <ThemedView style={styles.badge}>
               <ThemedText style={styles.badgeText}>Новое</ThemedText>
-            </ThemedView>
+            </ThemedView> */}
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 

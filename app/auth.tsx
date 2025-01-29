@@ -79,7 +79,7 @@ function AuthContent() {
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <Image 
+            <Image
               source={require('@/assets/images/ystu-logo.png')}
               style={styles.logo}
               resizeMode="contain"
@@ -125,13 +125,13 @@ function AuthContent() {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.passwordToggle, { backgroundColor: theme.inputBackground }]}
                   onPress={() => setShowPassword(!showPassword)}
                 >
-                  <IconSymbol 
-                    name={showPassword ? "eye.slash.fill" : "eye.fill"} 
-                    size={20} 
+                  <IconSymbol
+                    name={showPassword ? "eye.slash.fill" : "eye.fill"}
+                    size={20}
                     color={theme.secondaryText}
                   />
                 </TouchableOpacity>
@@ -155,7 +155,7 @@ function AuthContent() {
 
           {/* TODO: тут мб потом сделать получение по зачетке логина и пароля */}
 
-         {/* <View style={styles.actions}>
+          {/* <View style={styles.actions}>
             <TouchableOpacity>
               <ThemedText style={[styles.link, { color: theme.accentColor }]}>
                 Забыли пароль?
