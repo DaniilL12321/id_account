@@ -6,6 +6,7 @@ import { router, Stack } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
 const { OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } = Constants.expoConfig?.extra || {};
 
@@ -23,6 +24,7 @@ function AuthContent() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
@@ -77,8 +79,16 @@ function AuthContent() {
       >
         <View style={styles.content}>
           <View style={styles.header}>
+            <Image 
+              source={require('@/assets/images/ystu-logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <ThemedText style={[styles.title, { color: theme.textColor }]}>
-              Авторизация
+              ЯГТУ ID
+            </ThemedText>
+            <ThemedText style={[styles.subtitle, { color: theme.secondaryText }]}>
+              Единая система авторизации
             </ThemedText>
           </View>
 
@@ -99,20 +109,33 @@ function AuthContent() {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.inputBackground,
-                    color: theme.textColor,
-                  }
-                ]}
-                placeholder="Пароль"
-                placeholderTextColor={theme.secondaryText}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    {
+                      backgroundColor: theme.inputBackground,
+                      color: theme.textColor,
+                    }
+                  ]}
+                  placeholder="Пароль"
+                  placeholderTextColor={theme.secondaryText}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity 
+                  style={[styles.passwordToggle, { backgroundColor: theme.inputBackground }]}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <IconSymbol 
+                    name={showPassword ? "eye.slash.fill" : "eye.fill"} 
+                    size={20} 
+                    color={theme.secondaryText}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -126,7 +149,7 @@ function AuthContent() {
             </TouchableOpacity>
 
             <ThemedText style={[styles.hint, { color: theme.secondaryText }]}>
-              Используйте свои учетные данные от личного кабинета ЯГТУ
+              Используйте учетные данные от{'\n'}личного кабинета ЯГТУ
             </ThemedText>
           </View>
 
@@ -162,14 +185,25 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 24,
     justifyContent: 'center',
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 24,
+  },
+  logo: {
+    marginLeft: 26,
+    width: 180,
+    height: 90,
   },
   title: {
-    fontSize: 28,
+    fontSize: 34,
+    lineHeight: 40,
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 15,
   },
   form: {
     borderRadius: 16,
@@ -206,7 +240,25 @@ const styles = StyleSheet.create({
   },
   hint: {
     textAlign: 'center',
-    fontSize: 13,
+    fontSize: 14,
     marginTop: -8,
+    lineHeight: 20,
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  passwordInput: {
+    paddingRight: 50,
+  },
+  passwordToggle: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
   },
 }); 
