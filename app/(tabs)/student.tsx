@@ -117,7 +117,7 @@ export default function StudentProfileScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView 
         style={[styles.container, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
@@ -250,10 +250,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  contentContainer: {
+  content: {
     padding: 16,
     gap: 16,
-    paddingBottom: 80,
+    paddingBottom: Platform.OS === 'android' ? 20 : 80,
+    paddingTop: Platform.OS === 'android' ? 36 : 8,
   },
   loadingContainer: {
     flex: 1,
