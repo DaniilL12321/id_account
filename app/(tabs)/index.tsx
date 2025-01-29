@@ -119,7 +119,7 @@ export default function HomeScreen() {
   };
 
   const getDateWithOffset = (offset: number) => {
-    const now = new Date("2024-11-11");
+    const now = new Date();
     const mskOffset = 3;
     now.setHours(now.getHours() + mskOffset);
 
@@ -158,7 +158,7 @@ export default function HomeScreen() {
       const days = data.items.flatMap(item => item.days);
       const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<DayOffset, Lesson[]>;
 
-      const now = new Date("2024-11-11");
+      const now = new Date();
       const mskOffset = 3;
       now.setHours(now.getHours() + mskOffset);
 
