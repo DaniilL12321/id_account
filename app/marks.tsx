@@ -102,19 +102,21 @@ function MarksContent() {
     return (sum / numericMarks.length).toFixed(2);
   };
 
+  const getMarkDisplay = (mark: Mark) => {
+    if (mark.markName === null) return '-';
+    if (mark.mark === 0) return '✓';
+    if (mark.mark > 0) return mark.mark.toString();
+    return '-';
+  };
+
   const getMarkColor = (mark: Mark) => {
+    if (mark.markName === null) return theme.gray;
     if (mark.mark === 0) return theme.green;
     if (mark.mark === 5) return theme.green;
     if (mark.mark === 4) return theme.yellow;
     if (mark.mark === 3) return theme.blue;
     if (mark.mark === 2) return theme.red;
     return theme.gray;
-  };
-
-  const getMarkDisplay = (mark: Mark) => {
-    if (mark.mark === 0) return '✓';
-    if (mark.mark > 0) return mark.mark.toString();
-    return '-';
   };
 
   const filteredMarks = marks.filter(mark => mark.semester === selectedSemester);

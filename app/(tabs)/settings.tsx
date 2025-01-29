@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -22,9 +22,46 @@ export default function SettingsScreen() {
 function SettingsContent() {
   const { themeMode, setThemeMode, isDarkMode } = useTheme();
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const [isAdvancedMode, setIsAdvancedMode] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
-  
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const buildDate = new Date();
+  const buildNumber = Math.floor((Date.now() - buildDate.getTime()) / (1000 * 60 * 60 * 24));
+  const [modalVisible, setModalVisible] = useState(false);
+  const panY = useRef(new Animated.Value(0)).current;
+  const resetPositionAnim = Animated.timing(panY, {
+    toValue: 0,
+    duration: 200,
+    useNativeDriver: true,
+  });
+
+  const closeAnim = Animated.timing(panY, {
+    toValue: 300,
+    duration: 200,
+    useNativeDriver: true,
+  });
+
+  const panResponder = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderMove: (_, gestureState) => {
+      if (gestureState.dy > 0) {
+        panY.setValue(gestureState.dy);
+      }
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > 50) {
+        closeAnim.start(() => {
+          hideModal();
+          panY.setValue(0);
+        });
+      } else {
+        resetPositionAnim.start();
+      }
+    },
+  })).current;
+
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
@@ -33,6 +70,35 @@ function SettingsContent() {
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
   };
+
+  const showModal = () => {
+    panY.setValue(0);
+    setModalVisible(true);
+    setShowInfoModal(true);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideModal = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      panY.setValue(0);
+      setModalVisible(false);
+      setShowInfoModal(false);
+    });
+  };
+
+  useEffect(() => {
+    if (showInfoModal) {
+      showModal();
+    }
+  }, [showInfoModal]);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -102,7 +168,8 @@ function SettingsContent() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingsItem}>
+          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}>
             <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
               Расширенный режим
@@ -110,7 +177,8 @@ function SettingsContent() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingsItem}>
+          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}>
             <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
               Уведомления
@@ -120,7 +188,8 @@ function SettingsContent() {
         </ThemedView>
 
         <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity style={styles.settingsItem}>
+          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}>
             <IconSymbol name="globe" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
               Язык
@@ -131,7 +200,10 @@ function SettingsContent() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingsItem}>
+          <TouchableOpacity 
+            style={styles.settingsItem}
+            onPress={showModal}
+          >
             <IconSymbol name="info.circle.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
               О приложении
@@ -167,6 +239,91 @@ function SettingsContent() {
             <ThemeOption title="Системная" value="system" />
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="none"
+        onRequestClose={hideModal}
+      >
+        <View style={styles.modalContainer}>
+          <Animated.View 
+            style={[
+              styles.modalOverlay,
+              {
+                opacity: fadeAnim,
+              }
+            ]}
+          >
+            <TouchableOpacity 
+              style={{ flex: 1 }}
+              activeOpacity={1} 
+              onPress={hideModal}
+            />
+          </Animated.View>
+          <Animated.View 
+            style={[
+              styles.infoModalContent,
+              { 
+                backgroundColor: theme.cardBackground,
+                transform: [
+                  {
+                    translateY: Animated.add(
+                      fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [300, 0],
+                      }),
+                      panY
+                    ),
+                  },
+                ],
+              }
+            ]}
+            {...panResponder.panHandlers}
+          >
+            <View style={styles.dragIndicator} />
+            <View style={styles.infoModalHeader}>
+              <ThemedText style={[styles.infoModalTitle, { color: theme.textColor }]}>
+                О приложении
+              </ThemedText>
+              <TouchableOpacity onPress={hideModal}>
+                <IconSymbol name="xmark" size={20} color={theme.secondaryText} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.infoContent}>
+              <View style={styles.infoRow}>
+                <ThemedText style={{ color: theme.secondaryText }}>Название</ThemedText>
+                <ThemedText style={{ color: theme.textColor }}>ЯГТУ ID</ThemedText>
+              </View>
+              
+              <View style={styles.infoRow}>
+                <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
+                <ThemedText style={{ color: theme.textColor }}>1.0.0</ThemedText>
+              </View>
+
+              <View style={styles.infoRow}>
+                <ThemedText style={{ color: theme.secondaryText }}>Сборка</ThemedText>
+                <ThemedText style={{ color: theme.textColor }}>{buildNumber}</ThemedText>
+              </View>
+
+              <View style={styles.infoRow}>
+                <ThemedText style={{ color: theme.secondaryText }}>Дата сборки</ThemedText>
+                <ThemedText style={{ color: theme.textColor }}>
+                  {buildDate.toLocaleDateString('ru-RU')}
+                </ThemedText>
+              </View>
+
+              <View style={[styles.infoRow, { alignItems: 'flex-start' }]}>
+                <ThemedText style={{ color: theme.secondaryText }}>Описание</ThemedText>
+                <ThemedText style={[{ color: theme.textColor, flex: 1, textAlign: 'right' }]}>
+                  Мобильное приложение для студентов ЯГТУ
+                </ThemedText>
+              </View>
+            </View>
+          </Animated.View>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -220,13 +377,16 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   modalContent: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
     width: '80%',
+    transform: [{ translateX: -150 }, { translateY: -75 }],
     borderRadius: 14,
     overflow: 'hidden',
+    backgroundColor: 'white',
   },
   themeOption: {
     flexDirection: 'row',
@@ -239,5 +399,49 @@ const styles = StyleSheet.create({
   },
   themeOptionText: {
     fontSize: 17,
+  },
+  infoModalContent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+    transform: [{ translateY: 0 }],
+  },
+  dragIndicator: {
+    width: 36,
+    height: 4,
+    backgroundColor: 'rgba(128, 128, 128, 0.3)',
+    borderRadius: 2,
+    marginTop: 8,
+    marginBottom: 4,
+    alignSelf: 'center',
+  },
+  infoModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    paddingTop: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(128, 128, 128, 0.3)',
+  },
+  infoModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  infoContent: {
+    padding: 16,
+    gap: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
   },
 }); 
