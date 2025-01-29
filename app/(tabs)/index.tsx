@@ -7,6 +7,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/app/context/theme';
+import Constants from 'expo-constants';
+
+const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
 
 interface AuthInfo {
   auth: number;
@@ -128,7 +131,7 @@ export default function HomeScreen() {
 
   const fetchUserInfo = async (accessToken: string) => {
     try {
-      const response = await fetch('https://oauth.ystuty.ru/check', {
+      const response = await fetch(`${OAUTH_URL}/check`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -147,7 +150,7 @@ export default function HomeScreen() {
 
   const fetchSchedule = async (groupName: string) => {
     try {
-      const response = await fetch(`https://gg-api.ystuty.ru/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
+      const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
       const data: ScheduleResponse = await response.json();
 
       const days = data.items.flatMap(item => item.days);
@@ -218,7 +221,7 @@ export default function HomeScreen() {
 
   const fetchMarks = async (accessToken: string) => {
     try {
-      const response = await fetch('https://gg-api.ystuty.ru/s/general/v1/mark/my', {
+      const response = await fetch(`${API_URL}/s/general/v1/mark/my`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
