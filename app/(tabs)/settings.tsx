@@ -1,167 +1,63 @@
-import { View, Text, Switch, StyleSheet, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import React, { useEffect, useState } from 'react';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, type ThemeMode } from '../context/theme';
+import { router, Stack } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useTheme } from '@/app/context/theme';
+
+type ThemeMode = 'light' | 'dark' | 'system';
 
 export default function SettingsScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SettingsContent />
+    </>
+  );
+}
+
+function SettingsContent() {
   const { themeMode, setThemeMode, isDarkMode } = useTheme();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [isAdvancedMode, setIsAdvancedMode] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   
   const theme = {
-    background: isDarkMode ? '#000000' : '#f6f6f6',
-    card: isDarkMode ? '#1c1c1e' : '#ffffff',
-    text: isDarkMode ? '#ffffff' : '#000000',
-    secondaryText: isDarkMode ? '#8e8e93' : '#666666',
-    border: isDarkMode ? '#38383A' : '#cccccc',
+    background: isDarkMode ? '#000000' : '#F2F3F7',
+    cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
+    textColor: isDarkMode ? '#FFFFFF' : '#000000',
+    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    accentColor: '#2688EB',
   };
 
-  const styles = StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: theme.background,
-    },
-    container: {
-      flex: 1,
-    },
-    title: {
-      fontSize: 34,
-      fontWeight: 'bold',
-      padding: 16,
-      paddingTop: 8,
-      color: theme.text,
-    },
-    group: {
-      marginBottom: 24,
-    },
-    groupHeader: {
-      fontSize: 13,
-      color: theme.secondaryText,
-      textTransform: 'uppercase',
-      marginLeft: 16,
-      marginBottom: 8,
-    },
-    groupContent: {
-      backgroundColor: theme.card,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderColor: theme.border,
-    },
-    settingsItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 16,
-      backgroundColor: theme.card,
-      justifyContent: 'space-between',
-    },
-    settingsItemLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    settingsItemText: {
-      fontSize: 17,
-      color: theme.text,
-    },
-    icon: {
-      marginRight: 16,
-    },
-    rightText: {
-      color: theme.secondaryText,
-      marginRight: 8,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContent: {
-      width: '80%',
-      borderRadius: 14,
-      overflow: 'hidden',
-    },
-    themeOption: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 16,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-    },
-    selectedOption: {
-      backgroundColor: 'rgba(128, 128, 128, 0.1)',
-    },
-    themeOptionText: {
-      fontSize: 17,
-    },
-  });
-
-  const SettingsGroup = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <View style={styles.group}>
-      <Text style={styles.groupHeader}>{title}</Text>
-      <View style={styles.groupContent}>
-        {children}
-      </View>
-    </View>
-  );
-
-  const SettingsItem = ({ 
-    icon, 
-    title, 
-    value, 
-    onValueChange,
-    disabled = false,
-    rightText,
-  }: { 
-    icon?: string;
-    title: string;
-    value?: boolean;
-    onValueChange?: (value: boolean) => void;
-    disabled?: boolean;
-    rightText?: string;
-  }) => (
-    <View style={styles.settingsItem}>
-      <View style={styles.settingsItemLeft}>
-        {icon && <IconSymbol name={icon} size={24} color="#666" style={styles.icon} />}
-        <Text style={styles.settingsItemText}>{title}</Text>
-      </View>
-      {onValueChange && (
-        <Switch
-          value={value}
-          onValueChange={onValueChange}
-          disabled={disabled}
-        />
-      )}
-      {rightText && (
-        <Text style={styles.rightText}>{rightText}</Text>
-      )}
-    </View>
-  );
-
-  const ThemeSelector = () => (
-    <Modal
-      visible={showThemeModal}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => setShowThemeModal(false)}
-    >
-      <TouchableOpacity 
-        style={styles.modalOverlay}
-        activeOpacity={1} 
-        onPress={() => setShowThemeModal(false)}
-      >
-        <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-          <ThemeOption title="Светлая" value="light" />
-          <ThemeOption title="Тёмная" value="dark" />
-          <ThemeOption title="Системная" value="system" />
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
+  const handleLogout = async () => {
+    Alert.alert(
+      'Выход',
+      'Вы уверены, что хотите выйти?',
+      [
+        {
+          text: 'Отмена',
+          style: 'cancel'
+        },
+        {
+          text: 'Выйти',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('auth_tokens');
+              router.replace('/auth');
+            } catch (error) {
+              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const ThemeOption = ({ title, value }: { title: string; value: ThemeMode }) => (
     <TouchableOpacity
@@ -171,58 +67,177 @@ export default function SettingsScreen() {
         setShowThemeModal(false);
       }}
     >
-      <Text style={[styles.themeOptionText, { color: theme.text }]}>{title}</Text>
+      <ThemedText style={styles.themeOptionText}>{title}</ThemedText>
       {themeMode === value && (
-        <IconSymbol name="checkmark" size={20} color={theme.text} />
+        <IconSymbol name="checkmark" size={20} color={theme.textColor} />
       )}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} contentInsetAdjustmentBehavior="automatic">
-        <Text style={styles.title}>Настройки</Text>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <ScrollView 
+        style={[styles.container, { backgroundColor: theme.background }]}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <ThemedText style={[styles.title, { color: theme.textColor }]}>
+            Настройки
+          </ThemedText>
+        </View>
 
-        <SettingsGroup title="Настройки">
-          <SettingsItem
-            title="Расширенный режим"
-            value={isAdvancedMode}
-            onValueChange={setIsAdvancedMode}
-            disabled
-          />
-          <SettingsItem
-            title="Показывать уведомления"
-            value={showNotifications}
-            onValueChange={setShowNotifications}
-            disabled
-          />
-          <Pressable onPress={() => setShowThemeModal(true)}>
-            <SettingsItem
-              icon="moon"
-              title="Тема"
-              rightText={
-                themeMode === 'light' ? 'Светлая' :
-                themeMode === 'dark' ? 'Тёмная' : 'Системная'
-              }
-            />
-          </Pressable>
-        </SettingsGroup>
+        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+          <TouchableOpacity 
+            style={styles.settingsItem}
+            onPress={() => setShowThemeModal(true)}
+          >
+            <IconSymbol name="moon.fill" size={20} color={theme.accentColor} />
+            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              Тема
+            </ThemedText>
+            <ThemedText style={{ color: theme.secondaryText }}>
+              {themeMode === 'light' ? 'Светлая' : themeMode === 'dark' ? 'Тёмная' : 'Системная'}
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+          </TouchableOpacity>
 
-        <SettingsGroup title="Настройки системы">
-          <SettingsItem
-            title="Язык"
-            rightText="Русский"
-            disabled
-          />
-          <Pressable>
-            <SettingsItem
-              icon="info.circle"
-              title="О приложении"
-            />
-          </Pressable>
-        </SettingsGroup>
+          <TouchableOpacity style={styles.settingsItem}>
+            <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
+            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              Расширенный режим
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingsItem}>
+            <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
+            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              Уведомления
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+          </TouchableOpacity>
+        </ThemedView>
+
+        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+          <TouchableOpacity style={styles.settingsItem}>
+            <IconSymbol name="globe" size={20} color={theme.accentColor} />
+            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              Язык
+            </ThemedText>
+            <ThemedText style={{ color: theme.secondaryText }}>
+              Русский
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.settingsItem}>
+            <IconSymbol name="info.circle.fill" size={20} color={theme.accentColor} />
+            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              О приложении
+            </ThemedText>
+            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+          </TouchableOpacity>
+        </ThemedView>
+
+        <TouchableOpacity 
+          style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}
+          onPress={handleLogout}
+        >
+          <ThemedText style={styles.logoutButtonText}>
+            Выйти из аккаунта
+          </ThemedText>
+        </TouchableOpacity>
       </ScrollView>
-      <ThemeSelector />
+
+      <Modal
+        visible={showThemeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowThemeModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1} 
+          onPress={() => setShowThemeModal(false)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+            <ThemeOption title="Светлая" value="light" />
+            <ThemeOption title="Тёмная" value="dark" />
+            <ThemeOption title="Системная" value="system" />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
-} 
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    gap: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  section: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  settingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  settingsItemText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  logoutButton: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  themeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  selectedOption: {
+    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+  },
+  themeOptionText: {
+    fontSize: 17,
+  },
+}); 

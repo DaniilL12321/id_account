@@ -17,7 +17,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
 
   useEffect(() => {
-    // Загружаем сохраненную тему при старте
     AsyncStorage.getItem('themeMode').then((savedTheme) => {
       if (savedTheme) {
         setThemeMode(savedTheme as ThemeMode);
