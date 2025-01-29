@@ -6,6 +6,9 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { CheckResponse, UserDetailsResponse } from '@/types/api';
+import Constants from 'expo-constants';
+
+const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
 interface InfoItemProps {
   label: string;
@@ -64,7 +67,7 @@ export default function StudentProfileScreen() {
 
       const { access_token } = JSON.parse(tokens);
 
-      const checkResponse = await fetch('https://oauth.ystuty.ru/check', {
+      const checkResponse = await fetch(`${OAUTH_URL}/check`, {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },
@@ -77,7 +80,7 @@ export default function StudentProfileScreen() {
       const checkData: CheckResponse = await checkResponse.json();
       setUserInfo(checkData.auth_info.user);
 
-      const detailsResponse = await fetch('https://gg-api.ystuty.ru/s/general/v1/user/my', {
+      const detailsResponse = await fetch(`${API_URL}/s/general/v1/user/my`, {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },
@@ -158,7 +161,10 @@ export default function StudentProfileScreen() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]} 
+            disabled={true}
+          >
             <IconSymbol name="photo.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Портфолио
@@ -172,7 +178,10 @@ export default function StudentProfileScreen() {
             Документы
           </ThemedText>
           
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]}
+            disabled={true}
+          >
             <IconSymbol name="doc.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Справки
@@ -183,7 +192,10 @@ export default function StudentProfileScreen() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]}
+            disabled={true}
+          >
             <IconSymbol name="doc.text.fill" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Заявления
@@ -191,7 +203,10 @@ export default function StudentProfileScreen() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]}
+            disabled={true}
+          >
             <IconSymbol name="qrcode" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               QR Сертификаты
@@ -201,7 +216,10 @@ export default function StudentProfileScreen() {
         </ThemedView>
 
         <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]}
+            disabled={true}
+          >
             <IconSymbol name="gear" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Настройки профиля
@@ -209,7 +227,10 @@ export default function StudentProfileScreen() {
             <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.sectionItem}>
+          <TouchableOpacity 
+            style={[styles.sectionItem, { opacity: 0.5 }]}
+            disabled={true}
+          >
             <IconSymbol name="bell" size={20} color={theme.accentColor} />
             <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
               Уведомления
@@ -232,6 +253,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     gap: 16,
+    paddingBottom: 80,
   },
   loadingContainer: {
     flex: 1,

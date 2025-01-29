@@ -9,6 +9,9 @@ import { useTheme } from '@/app/context/theme';
 import { CheckResponse, UserDetailsResponse } from '@/types/api';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import Constants from 'expo-constants';
+
+const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
 interface InfoItemProps {
   label: string;
@@ -73,7 +76,7 @@ function InfoContent() {
 
       const { access_token } = JSON.parse(tokens);
 
-      const checkResponse = await fetch('https://oauth.ystuty.ru/check', {
+      const checkResponse = await fetch(`${OAUTH_URL}/check`, {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },
@@ -86,7 +89,7 @@ function InfoContent() {
       const checkData: CheckResponse = await checkResponse.json();
       setUserInfo(checkData.auth_info.user);
 
-      const detailsResponse = await fetch('https://gg-api.ystuty.ru/s/general/v1/user/my', {
+      const detailsResponse = await fetch(`${API_URL}/s/general/v1/user/my`, {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },
@@ -248,6 +251,7 @@ function InfoContent() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingBottom: -40,
   },
   container: {
     flex: 1,
@@ -255,6 +259,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 16,
+    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,

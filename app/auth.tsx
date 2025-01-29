@@ -5,6 +5,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@/app/context/theme';
+import Constants from 'expo-constants';
+
+const { OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } = Constants.expoConfig?.extra || {};
 
 export default function AuthScreen() {
   return (
@@ -40,7 +43,7 @@ function AuthContent() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://oauth.ystuty.ru/access_token?client_id=x-id&grant_type=password&scope=general:user:personal,general:mark:personal', {
+      const response = await fetch(`${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=password&scope=${OAUTH_SCOPE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,8 +71,8 @@ function AuthContent() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <KeyboardAvoidingView 
-        style={styles.container} 
+      <KeyboardAvoidingView
+        style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.content}>
@@ -84,7 +87,7 @@ function AuthContent() {
               <TextInput
                 style={[
                   styles.input,
-                  { 
+                  {
                     backgroundColor: theme.inputBackground,
                     color: theme.textColor,
                   }
@@ -99,7 +102,7 @@ function AuthContent() {
               <TextInput
                 style={[
                   styles.input,
-                  { 
+                  {
                     backgroundColor: theme.inputBackground,
                     color: theme.textColor,
                   }
@@ -112,7 +115,7 @@ function AuthContent() {
               />
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.button, { backgroundColor: theme.accentColor }]}
               onPress={handleLogin}
               disabled={loading}
@@ -127,7 +130,9 @@ function AuthContent() {
             </ThemedText>
           </View>
 
-          <View style={styles.actions}>
+          {/* TODO: тут мб потом сделать получение по зачетке логина и пароля */}
+
+         {/* <View style={styles.actions}>
             <TouchableOpacity>
               <ThemedText style={[styles.link, { color: theme.accentColor }]}>
                 Забыли пароль?
@@ -138,7 +143,7 @@ function AuthContent() {
                 Регистрация
               </ThemedText>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

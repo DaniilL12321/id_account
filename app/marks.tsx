@@ -7,6 +7,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/app/context/theme';
+import Constants from 'expo-constants';
+
+const { API_URL } = Constants.expoConfig?.extra || {};
 
 interface Mark {
   inDiplom: number;
@@ -65,7 +68,7 @@ function MarksContent() {
       }
 
       const { access_token } = JSON.parse(tokens);
-      const response = await fetch('https://gg-api.ystuty.ru/s/general/v1/mark/my', {
+      const response = await fetch(`${API_URL}/s/general/v1/mark/my`, {
         headers: {
           'Authorization': `Bearer ${access_token}`,
         },
@@ -228,6 +231,7 @@ function MarksContent() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingBottom: -40,
   },
   container: {
     flex: 1,
@@ -235,6 +239,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 16,
+    paddingBottom: 40,
   },
   loadingContainer: {
     flex: 1,
