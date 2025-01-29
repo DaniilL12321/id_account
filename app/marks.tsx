@@ -122,11 +122,9 @@ function MarksContent() {
   const filteredMarks = marks
     .filter(mark => mark.semester === selectedSemester)
     .sort((a, b) => {
-      // Если оценка не проставлена (markName === null), она должна быть в начале
       if (a.markName === null && b.markName !== null) return -1;
       if (a.markName !== null && b.markName === null) return 1;
       
-      // Сортировка по убыванию оценок
       return b.mark - a.mark;
     });
   const averageGrade = calculateAverageGrade(marks);

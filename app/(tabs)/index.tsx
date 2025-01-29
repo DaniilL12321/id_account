@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
 
@@ -102,6 +103,7 @@ export default function HomeScreen() {
     completedCount: 0,
     debtsCount: 0
   });
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
@@ -117,7 +119,7 @@ export default function HomeScreen() {
   };
 
   const getDateWithOffset = (offset: number) => {
-    const now = new Date();
+    const now = new Date("2024-11-11");
     const mskOffset = 3;
     now.setHours(now.getHours() + mskOffset);
 
@@ -156,7 +158,7 @@ export default function HomeScreen() {
       const days = data.items.flatMap(item => item.days);
       const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<DayOffset, Lesson[]>;
 
-      const now = new Date();
+      const now = new Date("2024-11-11");
       const mskOffset = 3;
       now.setHours(now.getHours() + mskOffset);
 
@@ -295,6 +297,31 @@ export default function HomeScreen() {
     init();
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      day: 'numeric',
+      month: 'long',
+      weekday: 'long'
+    };
+    return "Сегодня, " + date.toLocaleDateString('ru-RU', options);
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('ru-RU', { 
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -329,9 +356,84 @@ export default function HomeScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText style={[styles.pageTitle, { color: theme.textColor }]}>
-          Привет, {userInfo?.firstName}
+        <ThemedView style={styles.headerContainer}>
+          <ThemedText style={[styles.pageTitle, { color: theme.textColor }]}>
+            Привет, {userInfo?.firstName}
+          </ThemedText>
+          <ThemedView style={[styles.timeCard, { backgroundColor: theme.cardBackground }]}>
+            {Platform.OS === 'ios' ? (
+              <IconSymbol name="clock.fill" size={16} color={theme.accentColor} />
+            ) : (
+              <MaterialIcons name="access-time" size={16} color={theme.accentColor} />
+            )}
+            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+              {formatTime(currentTime)}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+        <ThemedText style={[styles.dateText, { color: theme.secondaryText }]}>
+          {formatDate(currentTime)}
         </ThemedText>
+
+        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView style={styles.cardHeader}>
+            <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+              Успеваемость
+            </ThemedText>
+            <TouchableOpacity onPress={() => router.push('/marks')}>
+              <ThemedText style={{ color: theme.accentColor }}>
+                Подробнее
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+
+          <ThemedView style={styles.statsGrid}>
+            <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
+              <IconSymbol name="star.fill" size={24} color={theme.yellow} />
+              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                {stats.averageGrade.toFixed(1)}
+              </ThemedText>
+              <ThemedText 
+                style={[styles.statLabel, { color: theme.secondaryText }]}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                minimumFontScale={0.75}
+              >
+                Средний балл
+              </ThemedText>
+            </ThemedView>
+
+            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
+              <IconSymbol name="checkmark.circle.fill" size={24} color={theme.green} />
+              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                {stats.completedCount}
+              </ThemedText>
+              <ThemedText 
+                style={[styles.statLabel, { color: theme.secondaryText }]}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                minimumFontScale={0.75}
+              >
+                Сдано
+              </ThemedText>
+            </ThemedView>
+
+            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
+              <IconSymbol name="exclamationmark.circle.fill" size={24} color={theme.red} />
+              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                {stats.debtsCount}
+              </ThemedText>
+              <ThemedText 
+                style={[styles.statLabel, { color: theme.secondaryText }]}
+                adjustsFontSizeToFit
+                numberOfLines={1}
+                minimumFontScale={0.75}
+              >
+                Долги
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        </ThemedView>
 
         <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
           <ThemedView style={styles.cardHeader}>
@@ -346,22 +448,35 @@ export default function HomeScreen() {
           </ThemedView>
 
           <ThemedView style={styles.segmentedControlContainer}>
-            <ThemedView style={[styles.segmentedControl, { backgroundColor: theme.segmentBackground }]}>
+            <ThemedView style={[styles.segmentedControl]}>
               {Object.entries(DAY_LABELS).map(([key, label]) => (
                 <TouchableOpacity
                   key={key}
                   style={[
                     styles.segment,
-                    selectedDay === Number(key) && { backgroundColor: theme.accentColor }
+                    { backgroundColor: selectedDay === Number(key) ? theme.accentColor : theme.background },
+                    Platform.select({
+                      ios: {
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: selectedDay === Number(key) ? 0.1 : 0.05,
+                        shadowRadius: 4,
+                      },
+                      android: {
+                        elevation: selectedDay === Number(key) ? 4 : 2,
+                      },
+                    }),
                   ]}
                   onPress={() => setSelectedDay(Number(key) as DayOffset)}
                 >
                   <ThemedText
                     style={[
                       styles.segmentText,
-                      { color: theme.textColor },
-                      selectedDay === Number(key) && { color: '#FFFFFF' }
+                      { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
                     ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
                   >
                     {label}
                   </ThemedText>
@@ -386,7 +501,7 @@ export default function HomeScreen() {
                     <ThemedView style={styles.scheduleTime}>
                       {lesson.timeRange ? (
                         <>
-                          <ThemedText style={[styles.timeText, { color: theme.textColor }]}>
+                          <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
                             {lesson.timeRange.split('-')[0]}
                           </ThemedText>
                           <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
@@ -442,45 +557,6 @@ export default function HomeScreen() {
                 );
               })
             )}
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-          <ThemedView style={styles.cardHeader}>
-            <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
-              Успеваемость
-            </ThemedText>
-            <TouchableOpacity onPress={() => router.push('/marks')}>
-              <ThemedText style={{ color: theme.accentColor }}>
-                Подробнее
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-
-          <ThemedView style={styles.statsGrid}>
-            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <IconSymbol name="star.fill" size={24} color={theme.yellow} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.averageGrade.toFixed(1)}
-              </ThemedText>
-              <ThemedText style={{ color: theme.secondaryText, textAlign: 'center' }}>Средний балл</ThemedText>
-            </ThemedView>
-
-            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <IconSymbol name="checkmark.circle.fill" size={24} color={theme.green} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.completedCount}
-              </ThemedText>
-              <ThemedText style={{ color: theme.secondaryText, textAlign: 'center' }}>Сдано</ThemedText>
-            </ThemedView>
-
-            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <IconSymbol name="exclamationmark.circle.fill" size={24} color={theme.red} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.debtsCount}
-              </ThemedText>
-              <ThemedText style={{ color: theme.secondaryText, textAlign: 'center' }}>Долги</ThemedText>
-            </ThemedView>
           </ThemedView>
         </ThemedView>
 
@@ -550,10 +626,48 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingBottom: 80,
   },
+  headerContainer: {
+    marginTop: -20,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: -30,
+  },
   pageTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+  },
+  timeCard: {
+    marginTop: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+    minWidth: 110,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  timeText: {
+    fontSize: 13,
+    fontWeight: '500',
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace' }),
+  },
+  dateText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   loadingContainer: {
     flex: 1,
@@ -592,18 +706,22 @@ const styles = StyleSheet.create({
   },
   segmentedControl: {
     flexDirection: 'row',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 2,
+    backgroundColor: 'transparent',
+    gap: 8,
   },
   segment: {
     flex: 1,
-    paddingVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 10,
+    backgroundColor: 'transparent',
   },
   segmentText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   scheduleList: {
     gap: 8,
@@ -620,18 +738,15 @@ const styles = StyleSheet.create({
   },
   scheduleTime: {
     width: 45,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 4,
-  },
-  timeText: {
-    fontSize: 12,
-    fontWeight: '500',
+    alignSelf: 'stretch',
   },
   lessonTypeLine: {
     width: 3,
     borderRadius: 1.5,
-    marginVertical: 2,
+    alignSelf: 'stretch',
   },
   scheduleInfo: {
     flex: 1,
@@ -659,11 +774,14 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   statCard: {
-    flex: 1,
     padding: 12,
     borderRadius: 12,
     alignItems: 'center',
     gap: 8,
+    flex: 0.8,
+  },
+  statCardWide: {
+    flex: 1.4,
   },
   statValue: {
     fontSize: 24,
@@ -702,5 +820,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '400',
     lineHeight: 20,
+  },
+  statLabel: {
+    textAlign: 'center',
+    fontSize: 13,
   },
 });
