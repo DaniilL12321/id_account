@@ -8,6 +8,14 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
+import Animated, { 
+  useAnimatedStyle, 
+  withRepeat, 
+  withSequence,
+  withTiming,
+  useSharedValue,
+  withDelay
+} from 'react-native-reanimated';
 
 const { API_URL } = Constants.expoConfig?.extra || {};
 
@@ -32,6 +40,102 @@ export default function MarksScreen() {
     </>
   );
 }
+
+const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
+  const opacity = useSharedValue(0.3);
+
+  React.useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withDelay(
+          Math.random() * 500,
+          withTiming(0.7, { duration: 1000 })
+        ),
+        withTiming(0.3, { duration: 1000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        style,
+        animatedStyle,
+        { backgroundColor: 'rgba(120, 120, 128, 0.2)' },
+      ]}
+    />
+  );
+};
+
+const MarksScreenSkeleton = ({ theme }: { theme: any }) => {
+  return (
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={[
+        styles.content,
+        Platform.OS === 'web' ? {
+          maxWidth: 768,
+          width: '100%',
+          marginHorizontal: 'auto',
+          paddingTop: 40,
+        } as ViewStyle : {}
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.header}>
+        <SkeletonLoader style={{ width: 24, height: 24, borderRadius: 12 }} />
+        <SkeletonLoader style={{ width: 150, height: 28, borderRadius: 8 }} />
+      </View>
+
+      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView style={styles.cardHeader}>
+          <SkeletonLoader style={{ width: 200, height: 20, borderRadius: 8 }} />
+          <SkeletonLoader style={{ width: 40, height: 28, borderRadius: 8 }} />
+        </ThemedView>
+      </ThemedView>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.semesterScroll}
+        contentContainerStyle={styles.semesterContainer}
+      >
+        {[1, 2, 3, 4].map((i) => (
+          <SkeletonLoader
+            key={i}
+            style={{
+              width: 100,
+              height: 36,
+              borderRadius: 20,
+              marginHorizontal: 4
+            }}
+          />
+        ))}
+      </ScrollView>
+
+      <View style={styles.marksList}>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <ThemedView
+            key={i}
+            style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
+          >
+            <View style={styles.markInfo}>
+              <SkeletonLoader style={{ width: '80%', height: 20, borderRadius: 8 }} />
+              <SkeletonLoader style={{ width: '60%', height: 16, borderRadius: 8, marginTop: 4 }} />
+            </View>
+            <SkeletonLoader style={{ width: 32, height: 32, borderRadius: 16 }} />
+          </ThemedView>
+        ))}
+      </View>
+    </ScrollView>
+  );
+};
 
 function MarksContent() {
   const { isDarkMode } = useTheme();
@@ -132,9 +236,7 @@ function MarksContent() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <ThemedView style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.accentColor} />
-        </ThemedView>
+        <MarksScreenSkeleton theme={theme} />
       </SafeAreaView>
     );
   }

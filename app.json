@@ -52,6 +52,10 @@
     },
     "updates": {
       "url": "https://u.expo.dev/2c23029f-1ccc-4c9a-aaa8-3ef8c7c83d32"
-    }
+    },
+    "assetBundlePatterns": [
+      "assets/images/*",
+      "assets/fonts/*"
+    ]
   }
 }

@@ -10,6 +10,14 @@ import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
 import { MaterialIcons } from '@expo/vector-icons';
+import Animated, { 
+  useAnimatedStyle, 
+  withRepeat, 
+  withSequence,
+  withTiming,
+  useSharedValue,
+  withDelay
+} from 'react-native-reanimated';
 
 const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
 
@@ -96,6 +104,146 @@ const DAY_LABELS: Record<DayOffset, string> = {
 const webStyles = {
   minHeight: '100vh',
 } as unknown as ViewStyle;
+
+const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
+  const opacity = useSharedValue(0.3);
+
+  React.useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withDelay(
+          Math.random() * 500,
+          withTiming(0.7, { duration: 1000 })
+        ),
+        withTiming(0.3, { duration: 1000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        style,
+        animatedStyle,
+        { backgroundColor: 'rgba(120, 120, 128, 0.2)' },
+      ]}
+    />
+  );
+};
+
+const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
+  return (
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { padding: 16, gap: 16, paddingBottom: 80 }
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <ThemedView style={styles.headerContainer}>
+        <SkeletonLoader style={{ width: 150, height: 28, borderRadius: 8 }} />
+        <SkeletonLoader style={{ width: 110, height: 32, borderRadius: 16 }} />
+      </ThemedView>
+      
+      <SkeletonLoader style={{ width: 200, height: 16, borderRadius: 8 }} />
+
+      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView style={styles.cardHeader}>
+          <SkeletonLoader style={{ width: 120, height: 24, borderRadius: 8 }} />
+          <SkeletonLoader style={{ width: 80, height: 20, borderRadius: 8 }} />
+        </ThemedView>
+
+        <ThemedView style={styles.statsGrid}>
+          <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
+            <SkeletonLoader style={{ width: 24, height: 24, borderRadius: 12 }} />
+            <SkeletonLoader style={{ width: 40, height: 28, borderRadius: 8 }} />
+            <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+          </ThemedView>
+
+          {[1, 2].map((i) => (
+            <ThemedView key={i} style={[styles.statCard, { backgroundColor: theme.background }]}>
+              <SkeletonLoader style={{ width: 24, height: 24, borderRadius: 12 }} />
+              <SkeletonLoader style={{ width: 30, height: 28, borderRadius: 8 }} />
+              <SkeletonLoader style={{ width: 60, height: 16, borderRadius: 8 }} />
+            </ThemedView>
+          ))}
+        </ThemedView>
+      </ThemedView>
+
+      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView style={styles.cardHeader}>
+          <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <SkeletonLoader style={{ width: 100, height: 24, borderRadius: 8 }} />
+            <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+          </ThemedView>
+          <SkeletonLoader style={{ width: 100, height: 20, borderRadius: 8 }} />
+        </ThemedView>
+
+        <ThemedView style={styles.segmentedControlContainer}>
+          <ThemedView style={styles.segmentedControl}>
+            {[1, 2, 3].map((i) => (
+              <SkeletonLoader
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 36,
+                  borderRadius: 10,
+                  marginHorizontal: 2
+                }}
+              />
+            ))}
+          </ThemedView>
+        </ThemedView>
+
+        <ThemedView style={styles.scheduleList}>
+          {[1, 2, 3].map((i) => (
+            <ThemedView
+              key={i}
+              style={[styles.scheduleItem, { borderColor: theme.borderColor }]}
+            >
+              <ThemedView style={styles.scheduleTime}>
+                <SkeletonLoader style={{ width: 40, height: 16, borderRadius: 8 }} />
+                <SkeletonLoader style={{ width: 40, height: 16, borderRadius: 8 }} />
+              </ThemedView>
+
+              <SkeletonLoader style={{ width: 3, height: '100%', borderRadius: 1.5 }} />
+
+              <ThemedView style={styles.scheduleInfo}>
+                <SkeletonLoader style={{ width: '80%', height: 20, borderRadius: 8 }} />
+                <ThemedView style={styles.lessonDetails}>
+                  <SkeletonLoader style={{ width: 120, height: 16, borderRadius: 8 }} />
+                  <SkeletonLoader style={{ width: 100, height: 16, borderRadius: 8 }} />
+                </ThemedView>
+              </ThemedView>
+            </ThemedView>
+          ))}
+        </ThemedView>
+      </ThemedView>
+
+      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView style={styles.cardHeader}>
+          <SkeletonLoader style={{ width: 140, height: 24, borderRadius: 8 }} />
+        </ThemedView>
+
+        <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
+          {[1, 2, 3, 4].map((i) => (
+            <ThemedView key={i} style={styles.actionButton}>
+              <SkeletonLoader style={{ width: 48, height: 48, borderRadius: 12 }} />
+              <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+            </ThemedView>
+          ))}
+        </ThemedView>
+      </ThemedView>
+    </ScrollView>
+  );
+};
 
 export default function HomeScreen() {
   const { isDarkMode } = useTheme();
@@ -329,11 +477,11 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Загрузка...</ThemedText>
-        </ThemedView>
-      </SafeAreaView>
+      <Container>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+          <HomeScreenSkeleton theme={theme} />
+        </SafeAreaView>
+      </Container>
     );
   }
 
@@ -357,7 +505,7 @@ export default function HomeScreen() {
   return (
     <Container>
       <SafeAreaView style={styles.container}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
@@ -451,10 +599,13 @@ export default function HomeScreen() {
                   Расписание
                 </ThemedText>
                 <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
-                  • {userInfo?.groupName}
+                  •
+                </ThemedText>
+                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                  {userInfo?.groupName}
                 </ThemedText>
               </ThemedView>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/schedule')}>
                 <ThemedText style={{ color: theme.accentColor }}>
                   Всё расписание
                 </ThemedText>
@@ -592,8 +743,8 @@ export default function HomeScreen() {
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-                disabled={true}>
+              <TouchableOpacity style={[styles.actionButton]}
+                onPress={() => router.push('/schedule')}>
                 <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
                   <IconSymbol name="calendar" size={24} color={theme.accentColor} />
                 </ThemedView>
@@ -718,7 +869,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
   },
   segmentedControlContainer: {
@@ -847,6 +998,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   groupText: {
-    fontSize: 13,
-  },
+    marginTop: 1,
+    fontSize: 12,
+  }
 });

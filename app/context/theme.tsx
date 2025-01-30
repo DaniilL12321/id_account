@@ -1,44 +1,69 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from 'react-native';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
-
-type ThemeContextType = {
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
+interface ThemeContextType {
   isDarkMode: boolean;
-};
+  toggleTheme: () => void;
+  setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
+  themeMode: 'light' | 'dark' | 'system';
+}
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  isDarkMode: false,
+  toggleTheme: () => {},
+  setThemeMode: () => {},
+  themeMode: 'system',
+});
+
+export const useTheme = () => useContext(ThemeContext);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemColorScheme = useColorScheme();
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>('system');
+  const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === 'dark');
 
   useEffect(() => {
-    AsyncStorage.getItem('themeMode').then((savedTheme) => {
-      if (savedTheme) {
-        setThemeMode(savedTheme as ThemeMode);
-      }
-    });
+    loadThemePreference();
   }, []);
 
-  const handleThemeChange = async (mode: ThemeMode) => {
-    setThemeMode(mode);
-    await AsyncStorage.setItem('themeMode', mode);
+  useEffect(() => {
+    if (themeMode === 'system') {
+      setIsDarkMode(systemColorScheme === 'dark');
+    } else {
+      setIsDarkMode(themeMode === 'dark');
+    }
+  }, [themeMode, systemColorScheme]);
+
+  const loadThemePreference = async () => {
+    try {
+      const savedThemeMode = await AsyncStorage.getItem('themeMode');
+      if (savedThemeMode) {
+        setThemeMode(savedThemeMode as 'light' | 'dark' | 'system');
+      }
+    } catch (error) {
+      console.error('Error loading theme preference:', error);
+    }
   };
 
-  const isDarkMode = themeMode === 'system' 
-    ? systemColorScheme === 'dark' 
-    : themeMode === 'dark';
+  const toggleTheme = () => {
+    const newMode = isDarkMode ? 'light' : 'dark';
+    setThemeMode(newMode);
+    AsyncStorage.setItem('themeMode', newMode);
+  };
+
+  const handleSetThemeMode = (mode: 'light' | 'dark' | 'system') => {
+    setThemeMode(mode);
+    AsyncStorage.setItem('themeMode', mode);
+  };
 
   return (
     <ThemeContext.Provider 
       value={{ 
-        themeMode, 
-        setThemeMode: handleThemeChange,
-        isDarkMode,
+        isDarkMode, 
+        toggleTheme, 
+        setThemeMode: handleSetThemeMode,
+        themeMode 
       }}
     >
       {children}
@@ -46,10 +71,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-} 
+export default ThemeProvider; 

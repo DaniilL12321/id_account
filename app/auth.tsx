@@ -75,7 +75,6 @@ function AuthContent() {
       router.replace('/');
     } catch (error) {
       if (Platform.OS === 'web') {
-        // Для веб используем кастомный алерт
         const errorMessage = error instanceof Error ? error.message : 'Произошла ошибка';
         const alertContainer = document.createElement('div');
         alertContainer.style.position = 'fixed';

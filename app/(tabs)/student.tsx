@@ -9,6 +9,14 @@ import { CheckResponse, UserDetailsResponse } from '@/types/api';
 import Constants from 'expo-constants';
 import { useTheme } from '@/app/context/theme';
 import { Container } from '@/components/ui/Container';
+import Animated, { 
+  useAnimatedStyle, 
+  withRepeat, 
+  withSequence,
+  withTiming,
+  useSharedValue,
+  withDelay
+} from 'react-native-reanimated';
 
 const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
@@ -41,6 +49,88 @@ interface ThemeConfig {
 const webStyles = {
   minHeight: '100vh',
 } as unknown as ViewStyle;
+
+const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
+  const opacity = useSharedValue(0.3);
+
+  React.useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withDelay(
+          Math.random() * 500,
+          withTiming(0.7, { duration: 1000 })
+        ),
+        withTiming(0.3, { duration: 1000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        style,
+        animatedStyle,
+        { backgroundColor: 'rgba(120, 120, 128, 0.2)' },
+      ]}
+    />
+  );
+};
+
+const StudentProfileSkeleton = ({ theme }: { theme: ThemeConfig }) => {
+  return (
+    <ScrollView 
+      style={styles.scrollView}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { padding: 16, gap: 16, paddingBottom: 80 }
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
+      <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
+        <SkeletonLoader style={{ width: 80, height: 80, borderRadius: 40 }} />
+        <SkeletonLoader style={{ width: 200, height: 24, borderRadius: 8, marginTop: 16 }} />
+        <SkeletonLoader style={{ width: 250, height: 18, borderRadius: 8, marginTop: 4 }} />
+      </ThemedView>
+
+      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+        {[1, 2, 3].map((i) => (
+          <ThemedView key={i} style={styles.sectionItem}>
+            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
+            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+          </ThemedView>
+        ))}
+      </ThemedView>
+
+      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+        <SkeletonLoader style={{ width: 120, height: 22, borderRadius: 8, margin: 16, marginBottom: 8 }} />
+        {[1, 2, 3].map((i) => (
+          <ThemedView key={i} style={styles.sectionItem}>
+            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
+            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+          </ThemedView>
+        ))}
+      </ThemedView>
+
+      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+        {[1, 2].map((i) => (
+          <ThemedView key={i} style={styles.sectionItem}>
+            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
+            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+          </ThemedView>
+        ))}
+      </ThemedView>
+    </ScrollView>
+  );
+};
 
 export default function StudentProfileScreen() {
   const { isDarkMode } = useTheme();
@@ -108,13 +198,13 @@ export default function StudentProfileScreen() {
     return (
       <Container>
         <SafeAreaView style={styles.container}>
-          <ThemedView style={styles.loadingContainer}>
-            {loading ? (
-              <ThemedText>Загрузка...</ThemedText>
-            ) : (
+          {loading ? (
+            <StudentProfileSkeleton theme={theme} />
+          ) : (
+            <ThemedView style={styles.loadingContainer}>
               <ThemedText style={styles.error}>{error || 'Не удалось загрузить данные'}</ThemedText>
-            )}
-          </ThemedView>
+            </ThemedView>
+          )}
         </SafeAreaView>
       </Container>
     );
