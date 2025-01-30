@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder, ViewStyle, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
+
+const webStyles = {
+  minHeight: '100vh',
+} as unknown as ViewStyle;
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -23,9 +28,11 @@ function SettingsContent() {
   const { themeMode, setThemeMode, isDarkMode } = useTheme();
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isAdvancedMode, setIsAdvancedMode] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
+  const [logoutFadeAnim] = useState(new Animated.Value(0));
   const buildDate = new Date();
   const buildNumber = Math.floor((Date.now() - buildDate.getTime()) / (1000 * 60 * 60 * 24));
   const [modalVisible, setModalVisible] = useState(false);
@@ -101,28 +108,49 @@ function SettingsContent() {
   }, [showInfoModal]);
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Выход',
-      'Вы уверены, что хотите выйти?',
-      [
-        {
-          text: 'Отмена',
-          style: 'cancel'
-        },
-        {
-          text: 'Выйти',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('auth_tokens');
-              router.replace('/auth');
-            } catch (error) {
-              Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
-            }
+    if (Platform.OS === 'web') {
+      setShowLogoutModal(true);
+      Animated.timing(logoutFadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Alert.alert(
+        'Выход',
+        'Вы уверены, что хотите выйти?',
+        [
+          {
+            text: 'Отмена',
+            style: 'cancel'
+          },
+          {
+            text: 'Выйти',
+            style: 'destructive',
+            onPress: performLogout
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
+  };
+
+  const hideLogoutModal = () => {
+    Animated.timing(logoutFadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowLogoutModal(false);
+    });
+  };
+
+  const performLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('auth_tokens');
+      router.replace('/auth');
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось выйти из аккаунта');
+    }
   };
 
   const ThemeOption = ({ title, value }: { title: string; value: ThemeMode }) => (
@@ -141,86 +169,91 @@ function SettingsContent() {
   );
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <ScrollView 
-        style={[styles.container, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <ThemedText style={[styles.title, { color: theme.textColor }]}>
-            Настройки
-          </ThemedText>
-        </View>
-
-        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity 
-            style={styles.settingsItem}
-            onPress={() => setShowThemeModal(true)}
-          >
-            <IconSymbol name="moon.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
-              Тема
-            </ThemedText>
-            <ThemedText style={{ color: theme.secondaryText }}>
-              {themeMode === 'light' ? 'Светлая' : themeMode === 'dark' ? 'Тёмная' : 'Системная'}
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
-            <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
-              Расширенный режим
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
-            <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
-              Уведомления
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-        </ThemedView>
-
-        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
-            <IconSymbol name="globe" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
-              Язык
-            </ThemedText>
-            <ThemedText style={{ color: theme.secondaryText }}>
-              Русский
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingsItem}
-            onPress={showModal}
-          >
-            <IconSymbol name="info.circle.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
-              О приложении
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-        </ThemedView>
-
-        <TouchableOpacity 
-          style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}
-          onPress={handleLogout}
+    <Container>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <ScrollView 
+          style={[styles.scrollView, { backgroundColor: theme.background }]}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { padding: 16, gap: 16, paddingBottom: 80 }
+          ]}
+          showsVerticalScrollIndicator={false}
         >
-          <ThemedText style={styles.logoutButtonText}>
-            Выйти из аккаунта
-          </ThemedText>
-        </TouchableOpacity>
-      </ScrollView>
+          <View style={styles.header}>
+            <ThemedText style={[styles.title, { color: theme.textColor }]}>
+              Настройки
+            </ThemedText>
+          </View>
+
+          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <TouchableOpacity 
+              style={styles.settingsItem}
+              onPress={() => setShowThemeModal(true)}
+            >
+              <IconSymbol name="moon.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                Тема
+              </ThemedText>
+              <ThemedText style={{ color: theme.secondaryText }}>
+                {themeMode === 'light' ? 'Светлая' : themeMode === 'dark' ? 'Тёмная' : 'Системная'}
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+                disabled={true}>
+              <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                Расширенный режим
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+                disabled={true}>
+              <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                Уведомления
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+          </ThemedView>
+
+          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
+                disabled={true}>
+              <IconSymbol name="globe" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                Язык
+              </ThemedText>
+              <ThemedText style={{ color: theme.secondaryText }}>
+                Русский
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingsItem}
+              onPress={showModal}
+            >
+              <IconSymbol name="info.circle.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                О приложении
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+          </ThemedView>
+
+          <TouchableOpacity 
+            style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}
+            onPress={handleLogout}
+          >
+            <ThemedText style={styles.logoutButtonText}>
+              Выйти из аккаунта
+            </ThemedText>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
 
       <Modal
         visible={showThemeModal}
@@ -233,7 +266,16 @@ function SettingsContent() {
           activeOpacity={1} 
           onPress={() => setShowThemeModal(false)}
         >
-          <View style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+          <View style={[
+            styles.modalContent, 
+            { 
+              backgroundColor: theme.cardBackground,
+              ...(Platform.OS === 'web' ? {
+                maxWidth: 400,
+                marginHorizontal: 'auto',
+              } : {})
+            }
+          ]}>
             <ThemeOption title="Светлая" value="light" />
             <ThemeOption title="Тёмная" value="dark" />
             <ThemeOption title="Системная" value="system" />
@@ -247,99 +289,198 @@ function SettingsContent() {
         animationType="none"
         onRequestClose={hideModal}
       >
-        <View style={styles.modalContainer}>
-          <Animated.View 
-            style={[
-              styles.modalOverlay,
-              {
-                opacity: fadeAnim,
-              }
-            ]}
+        <Animated.View 
+          style={[
+            styles.modalContainer,
+            Platform.OS === 'web' ? {
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: fadeAnim,
+            } : {}
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.modalContainerTouchable}
+            activeOpacity={1}
+            onPress={hideModal}
           >
-            <TouchableOpacity 
-              style={{ flex: 1 }}
-              activeOpacity={1} 
-              onPress={hideModal}
-            />
-          </Animated.View>
-          <Animated.View 
-            style={[
-              styles.infoModalContent,
-              { 
-                backgroundColor: theme.cardBackground,
-                transform: [
-                  {
-                    translateY: Animated.add(
-                      fadeAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [300, 0],
-                      }),
-                      panY
-                    ),
-                  },
-                ],
-              }
-            ]}
-            {...panResponder.panHandlers}
-          >
-            <View style={styles.dragIndicator} />
-            <View style={styles.infoModalHeader}>
-              <ThemedText style={[styles.infoModalTitle, { color: theme.textColor }]}>
-                О приложении
-              </ThemedText>
-              <TouchableOpacity onPress={hideModal}>
-                <IconSymbol name="xmark" size={20} color={theme.secondaryText} />
-              </TouchableOpacity>
-            </View>
+            <Animated.View 
+              style={[
+                styles.infoModalContent,
+                { 
+                  backgroundColor: theme.cardBackground,
+                  transform: Platform.OS === 'web' 
+                    ? [{
+                        scale: fadeAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.95, 1],
+                        }),
+                      }]
+                    : [
+                        {
+                          translateY: Animated.add(
+                            fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [300, 0],
+                            }),
+                            panY
+                          ),
+                        },
+                      ],
+                  ...(Platform.OS === 'web' ? {
+                    position: 'relative',
+                    maxWidth: 600,
+                    width: '100%',
+                    marginHorizontal: 'auto',
+                    borderRadius: 16,
+                    bottom: 'auto',
+                  } : {})
+                }
+              ]}
+              {...(Platform.OS !== 'web' ? panResponder.panHandlers : {})}
+              onStartShouldSetResponder={() => true}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
+              {Platform.OS !== 'web' && <View style={styles.dragIndicator} />}
+              <View style={styles.infoModalHeader}>
+                <ThemedText style={[styles.infoModalTitle, { color: theme.textColor }]}>
+                  О приложении
+                </ThemedText>
+                <TouchableOpacity onPress={hideModal}>
+                  <IconSymbol name="xmark" size={20} color={theme.secondaryText} />
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.infoContent}>
-              <View style={styles.infoRow}>
-                <ThemedText style={{ color: theme.secondaryText }}>Название</ThemedText>
-                <ThemedText style={{ color: theme.textColor }}>ЯГТУ ID</ThemedText>
+              <View style={styles.infoContent}>
+                <View style={styles.infoRow}>
+                  <ThemedText style={{ color: theme.secondaryText }}>Название</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>ЯГТУ ID</ThemedText>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>1.0.0</ThemedText>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <ThemedText style={{ color: theme.secondaryText }}>Сборка</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>{buildNumber}</ThemedText>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <ThemedText style={{ color: theme.secondaryText }}>Дата сборки</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>
+                    {buildDate.toLocaleDateString('ru-RU')}
+                  </ThemedText>
+                </View>
+
+                <View style={[styles.infoRow, { alignItems: 'flex-start' }]}>
+                  <ThemedText style={{ color: theme.secondaryText }}>Описание</ThemedText>
+                  <ThemedText style={[{ color: theme.textColor, flex: 1, textAlign: 'right' }]}>
+                    Мобильное приложение для студентов ЯГТУ
+                  </ThemedText>
+                </View>
+              </View>
+            </Animated.View>
+          </TouchableOpacity>
+        </Animated.View>
+      </Modal>
+
+      <Modal
+        visible={showLogoutModal}
+        transparent={true}
+        animationType="none"
+        onRequestClose={hideLogoutModal}
+      >
+        <Animated.View 
+          style={[
+            styles.modalContainer,
+            Platform.OS === 'web' ? {
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: logoutFadeAnim,
+            } : {}
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.modalContainerTouchable}
+            activeOpacity={1}
+            onPress={hideLogoutModal}
+          >
+            <Animated.View 
+              style={[
+                styles.logoutModalContent,
+                { 
+                  backgroundColor: theme.cardBackground,
+                  transform: Platform.OS === 'web' 
+                    ? [{
+                        scale: logoutFadeAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.95, 1],
+                        }),
+                      }]
+                    : []
+                }
+              ]}
+              onStartShouldSetResponder={() => true}
+              onTouchEnd={(e) => e.stopPropagation()}
+            >
+              <View style={styles.logoutModalHeader}>
+                <ThemedText style={[styles.logoutModalTitle, { color: theme.textColor }]}>
+                  Выход
+                </ThemedText>
               </View>
               
-              <View style={styles.infoRow}>
-                <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
-                <ThemedText style={{ color: theme.textColor }}>1.0.0</ThemedText>
-              </View>
-
-              <View style={styles.infoRow}>
-                <ThemedText style={{ color: theme.secondaryText }}>Сборка</ThemedText>
-                <ThemedText style={{ color: theme.textColor }}>{buildNumber}</ThemedText>
-              </View>
-
-              <View style={styles.infoRow}>
-                <ThemedText style={{ color: theme.secondaryText }}>Дата сборки</ThemedText>
-                <ThemedText style={{ color: theme.textColor }}>
-                  {buildDate.toLocaleDateString('ru-RU')}
+              <View style={styles.logoutModalBody}>
+                <ThemedText style={[styles.logoutModalText, { color: theme.textColor }]}>
+                  Вы уверены, что хотите выйти?
                 </ThemedText>
               </View>
 
-              <View style={[styles.infoRow, { alignItems: 'flex-start' }]}>
-                <ThemedText style={{ color: theme.secondaryText }}>Описание</ThemedText>
-                <ThemedText style={[{ color: theme.textColor, flex: 1, textAlign: 'right' }]}>
-                  Мобильное приложение для студентов ЯГТУ
-                </ThemedText>
+              <View style={styles.logoutModalActions}>
+                <TouchableOpacity 
+                  style={[styles.logoutModalButton, { backgroundColor: theme.cardBackground }]}
+                  onPress={hideLogoutModal}
+                >
+                  <ThemedText style={[styles.logoutModalButtonText, { color: theme.textColor }]}>
+                    Отмена
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.logoutModalButton, styles.logoutModalButtonDanger]}
+                  onPress={() => {
+                    hideLogoutModal();
+                    performLogout();
+                  }}
+                >
+                  <ThemedText style={[styles.logoutModalButtonText, { color: '#FFFFFF' }]}>
+                    Выйти
+                  </ThemedText>
+                </TouchableOpacity>
               </View>
-            </View>
-          </Animated.View>
-        </View>
+            </Animated.View>
+          </TouchableOpacity>
+        </Animated.View>
       </Modal>
-    </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-  },
+    width: '100%',
+  } as ViewStyle,
+  scrollView: {
+    flex: 1,
+    width: '100%',
+  } as ViewStyle,
+  scrollContent: {
+    flexGrow: 1,
+    ...Platform.select({
+      web: webStyles,
+    }),
+  } as ViewStyle,
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -377,16 +518,12 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    padding: 16,
   },
   modalContent: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: '80%',
-    transform: [{ translateX: -150 }, { translateY: -75 }],
     borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: 'white',
+    padding: 8,
   },
   themeOption: {
     flexDirection: 'row',
@@ -401,14 +538,23 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   infoModalContent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    ...Platform.select({
+      web: {
+        position: 'relative',
+        maxWidth: 600,
+        width: '100%',
+        borderRadius: 16,
+      },
+      default: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      },
+    }),
     paddingBottom: 40,
-    transform: [{ translateY: 0 }],
   },
   dragIndicator: {
     width: 36,
@@ -442,6 +588,78 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContainer: {
+    ...Platform.select({
+      web: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      },
+      default: {
+        flex: 1,
+      },
+    }),
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainerTouchable: {
     flex: 1,
+    justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end',
+    alignItems: Platform.OS === 'web' ? 'center' : 'stretch',
+    padding: Platform.OS === 'web' ? 16 : 0,
+  },
+  logoutModalContent: {
+    ...Platform.select({
+      web: {
+        position: 'relative',
+        maxWidth: 400,
+        width: '100%',
+        borderRadius: 16,
+      },
+      default: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      },
+    }),
+  },
+  logoutModalHeader: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(128, 128, 128, 0.3)',
+  },
+  logoutModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  logoutModalBody: {
+    padding: 16,
+  },
+  logoutModalText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  logoutModalActions: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 8,
+  },
+  logoutModalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutModalButtonDanger: {
+    backgroundColor: '#FF3B30',
+  },
+  logoutModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 

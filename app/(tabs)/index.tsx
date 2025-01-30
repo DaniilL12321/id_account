@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Platform, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Platform, ScrollView, Image, TouchableOpacity, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -91,6 +92,10 @@ const DAY_LABELS: Record<DayOffset, string> = {
   1: 'Завтра',
   2: 'Послезавтра',
 };
+
+const webStyles = {
+  minHeight: '100vh',
+} as unknown as ViewStyle;
 
 export default function HomeScreen() {
   const { isDarkMode } = useTheme();
@@ -350,286 +355,297 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <ScrollView
-        style={[styles.container, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <ThemedView style={styles.headerContainer}>
-          <ThemedText style={[styles.pageTitle, { color: theme.textColor }]}>
-            Привет, {userInfo?.firstName}
+    <Container>
+      <SafeAreaView style={styles.container}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { padding: 16, gap: 16, paddingBottom: 80 }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedView style={styles.headerContainer}>
+            <ThemedText style={[styles.pageTitle, { color: theme.textColor }]}>
+              Привет, {userInfo?.firstName}
+            </ThemedText>
+            <ThemedView style={[styles.timeCard, { backgroundColor: theme.cardBackground }]}>
+              {Platform.OS === 'ios' ? (
+                <IconSymbol name="clock.fill" size={16} color={theme.accentColor} />
+              ) : (
+                <MaterialIcons name="access-time" size={16} color={theme.accentColor} />
+              )}
+              <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                {formatTime(currentTime)}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+          <ThemedText style={[styles.dateText, { color: theme.secondaryText }]}>
+            {formatDate(currentTime)}
           </ThemedText>
-          <ThemedView style={[styles.timeCard, { backgroundColor: theme.cardBackground }]}>
-            {Platform.OS === 'ios' ? (
-              <IconSymbol name="clock.fill" size={16} color={theme.accentColor} />
-            ) : (
-              <MaterialIcons name="access-time" size={16} color={theme.accentColor} />
-            )}
-            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-              {formatTime(currentTime)}
-            </ThemedText>
-          </ThemedView>
-        </ThemedView>
-        <ThemedText style={[styles.dateText, { color: theme.secondaryText }]}>
-          {formatDate(currentTime)}
-        </ThemedText>
 
-        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-          <ThemedView style={styles.cardHeader}>
-            <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
-              Успеваемость
-            </ThemedText>
-            <TouchableOpacity onPress={() => router.push('/marks')}>
-              <ThemedText style={{ color: theme.accentColor }}>
-                Подробнее
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-
-          <ThemedView style={styles.statsGrid}>
-            <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
-              <IconSymbol name="star.fill" size={24} color={theme.yellow} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.averageGrade.toFixed(1)}
-              </ThemedText>
-              <ThemedText
-                style={[styles.statLabel, { color: theme.secondaryText }]}
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                minimumFontScale={0.75}
-              >
-                Средний балл
-              </ThemedText>
-            </ThemedView>
-
-            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <IconSymbol name="checkmark.circle.fill" size={24} color={theme.green} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.completedCount}
-              </ThemedText>
-              <ThemedText
-                style={[styles.statLabel, { color: theme.secondaryText }]}
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                minimumFontScale={0.75}
-              >
-                Сдано
-              </ThemedText>
-            </ThemedView>
-
-            <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <IconSymbol name="exclamationmark.circle.fill" size={24} color={theme.red} />
-              <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
-                {stats.debtsCount}
-              </ThemedText>
-              <ThemedText
-                style={[styles.statLabel, { color: theme.secondaryText }]}
-                adjustsFontSizeToFit
-                numberOfLines={1}
-                minimumFontScale={0.75}
-              >
-                Долги
-              </ThemedText>
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-          <ThemedView style={styles.cardHeader}>
-            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+            <ThemedView style={styles.cardHeader}>
               <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
-                Расписание
+                Успеваемость
               </ThemedText>
-              <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
-                • {userInfo?.groupName}
-              </ThemedText>
+              <TouchableOpacity onPress={() => router.push('/marks')}>
+                <ThemedText style={{ color: theme.accentColor }}>
+                  Подробнее
+                </ThemedText>
+              </TouchableOpacity>
             </ThemedView>
-            <TouchableOpacity>
-              <ThemedText style={{ color: theme.accentColor }}>
-                Всё расписание
-              </ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
 
-          <ThemedView style={styles.segmentedControlContainer}>
-            <ThemedView style={[styles.segmentedControl]}>
-              {Object.entries(DAY_LABELS).map(([key, label]) => (
-                <TouchableOpacity
-                  key={key}
-                  style={[
-                    styles.segment,
-                    { backgroundColor: selectedDay === Number(key) ? theme.accentColor : theme.background },
-                    Platform.select({
-                      ios: {
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: selectedDay === Number(key) ? 0.1 : 0.05,
-                        shadowRadius: 4,
-                      },
-                      android: {
-                        elevation: selectedDay === Number(key) ? 4 : 2,
-                      },
-                    }),
-                  ]}
-                  onPress={() => setSelectedDay(Number(key) as DayOffset)}
+            <ThemedView style={styles.statsGrid}>
+              <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
+                <IconSymbol name="star.fill" size={24} color={theme.yellow} />
+                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                  {stats.averageGrade.toFixed(1)}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.statLabel, { color: theme.secondaryText }]}
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  minimumFontScale={0.75}
                 >
-                  <ThemedText
-                    style={[
-                      styles.segmentText,
-                      { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                  >
-                    {label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
+                  Средний балл
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
+                <IconSymbol name="checkmark.circle.fill" size={24} color={theme.green} />
+                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                  {stats.completedCount}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.statLabel, { color: theme.secondaryText }]}
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  minimumFontScale={0.75}
+                >
+                  Сдано
+                </ThemedText>
+              </ThemedView>
+
+              <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
+                <IconSymbol name="exclamationmark.circle.fill" size={24} color={theme.red} />
+                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                  {stats.debtsCount}
+                </ThemedText>
+                <ThemedText
+                  style={[styles.statLabel, { color: theme.secondaryText }]}
+                  adjustsFontSizeToFit
+                  numberOfLines={1}
+                  minimumFontScale={0.75}
+                >
+                  Долги
+                </ThemedText>
+              </ThemedView>
             </ThemedView>
           </ThemedView>
 
-          <ThemedView style={styles.scheduleList}>
-            {currentSchedule.length === 0 ? (
-              <ThemedText style={{ color: theme.secondaryText, textAlign: 'center', padding: 16 }}>
-                {`${DAY_LABELS[selectedDay]} пар нет`}
-              </ThemedText>
-            ) : (
-              currentSchedule.map((lesson, index) => {
-                const typeInfo = getLessonTypeInfo(lesson.type);
-                return (
-                  <ThemedView
-                    key={index}
-                    style={[styles.scheduleItem, { borderColor: theme.borderColor }]}
+          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+            <ThemedView style={styles.cardHeader}>
+              <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+                  Расписание
+                </ThemedText>
+                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                  • {userInfo?.groupName}
+                </ThemedText>
+              </ThemedView>
+              <TouchableOpacity>
+                <ThemedText style={{ color: theme.accentColor }}>
+                  Всё расписание
+                </ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+
+            <ThemedView style={styles.segmentedControlContainer}>
+              <ThemedView style={[styles.segmentedControl]}>
+                {Object.entries(DAY_LABELS).map(([key, label]) => (
+                  <TouchableOpacity
+                    key={key}
+                    style={[
+                      styles.segment,
+                      { backgroundColor: selectedDay === Number(key) ? theme.accentColor : theme.background },
+                      Platform.select({
+                        ios: {
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: selectedDay === Number(key) ? 0.1 : 0.05,
+                          shadowRadius: 4,
+                        },
+                        android: {
+                          elevation: selectedDay === Number(key) ? 4 : 2,
+                        },
+                      }),
+                    ]}
+                    onPress={() => setSelectedDay(Number(key) as DayOffset)}
                   >
-                    <ThemedView style={styles.scheduleTime}>
-                      {lesson.timeRange ? (
-                        <>
-                          <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-                            {lesson.timeRange.split('-')[0]}
-                          </ThemedText>
-                          <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-                            {lesson.timeRange.split('-')[1]}
-                          </ThemedText>
-                        </>
-                      ) : (
-                        <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
-                          ∞
-                        </ThemedText>
-                      )}
-                    </ThemedView>
+                    <ThemedText
+                      style={[
+                        styles.segmentText,
+                        { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
+                      ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                    >
+                      {label}
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </ThemedView>
+            </ThemedView>
 
-                    <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
-
-                    <ThemedView style={styles.scheduleInfo}>
-                      <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
-                        {lesson.lessonName}
-                        {!lesson.timeRange && (
-                          <ThemedText style={[styles.examLabel, { color: typeInfo.color }]}>
-                            {' • ' + typeInfo.label}
+            <ThemedView style={styles.scheduleList}>
+              {currentSchedule.length === 0 ? (
+                <ThemedText style={{ color: theme.secondaryText, textAlign: 'center', padding: 16 }}>
+                  {`${DAY_LABELS[selectedDay]} пар нет`}
+                </ThemedText>
+              ) : (
+                currentSchedule.map((lesson, index) => {
+                  const typeInfo = getLessonTypeInfo(lesson.type);
+                  return (
+                    <ThemedView
+                      key={index}
+                      style={[styles.scheduleItem, { borderColor: theme.borderColor }]}
+                    >
+                      <ThemedView style={styles.scheduleTime}>
+                        {lesson.timeRange ? (
+                          <>
+                            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                              {lesson.timeRange.split('-')[0]}
+                            </ThemedText>
+                            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                              {lesson.timeRange.split('-')[1]}
+                            </ThemedText>
+                          </>
+                        ) : (
+                          <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
+                            ∞
                           </ThemedText>
-                        )}
-                      </ThemedText>
-                      <ThemedView style={styles.lessonDetails}>
-                        {lesson.auditoryName && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              {lesson.auditoryName}
-                            </ThemedText>
-                          </ThemedView>
-                        )}
-                        {lesson.teacherName && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              {lesson.teacherName}
-                            </ThemedText>
-                          </ThemedView>
-                        )}
-                        {lesson.isDistant && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              Дистанционно
-                            </ThemedText>
-                          </ThemedView>
                         )}
                       </ThemedView>
+
+                      <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
+
+                      <ThemedView style={styles.scheduleInfo}>
+                        <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                          {lesson.lessonName}
+                          {!lesson.timeRange && (
+                            <ThemedText style={[styles.examLabel, { color: typeInfo.color }]}>
+                              {' • ' + typeInfo.label}
+                            </ThemedText>
+                          )}
+                        </ThemedText>
+                        <ThemedView style={styles.lessonDetails}>
+                          {lesson.auditoryName && (
+                            <ThemedView style={styles.detailItem}>
+                              <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
+                              <ThemedText style={{ color: theme.secondaryText }}>
+                                {lesson.auditoryName}
+                              </ThemedText>
+                            </ThemedView>
+                          )}
+                          {lesson.teacherName && (
+                            <ThemedView style={styles.detailItem}>
+                              <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
+                              <ThemedText style={{ color: theme.secondaryText }}>
+                                {lesson.teacherName}
+                              </ThemedText>
+                            </ThemedView>
+                          )}
+                          {lesson.isDistant && (
+                            <ThemedView style={styles.detailItem}>
+                              <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
+                              <ThemedText style={{ color: theme.secondaryText }}>
+                                Дистанционно
+                              </ThemedText>
+                            </ThemedView>
+                          )}
+                        </ThemedView>
+                      </ThemedView>
                     </ThemedView>
-                  </ThemedView>
-                );
-              })
-            )}
-          </ThemedView>
-        </ThemedView>
-
-        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-          <ThemedView style={styles.cardHeader}>
-            <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
-              Быстрые действия
-            </ThemedText>
+                  );
+                })
+              )}
+            </ThemedView>
           </ThemedView>
 
-          <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
-            <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-              disabled={true}>
-              <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                <IconSymbol name="doc.fill" size={24} color={theme.accentColor} />
-              </ThemedView>
-              <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
-                Справка
+          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+            <ThemedView style={styles.cardHeader}>
+              <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+                Быстрые действия
               </ThemedText>
-            </TouchableOpacity>
+            </ThemedView>
 
-            <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-              disabled={true}>
-              <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                <IconSymbol name="calendar" size={24} color={theme.accentColor} />
-              </ThemedView>
-              <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
-                Расписание
-              </ThemedText>
-            </TouchableOpacity>
+            <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
+              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}>
+                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
+                  <IconSymbol name="doc.fill" size={24} color={theme.accentColor} />
+                </ThemedView>
+                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                  Справка
+                </ThemedText>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-              disabled={true}>
-              <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                <IconSymbol name="person.2.fill" size={24} color={theme.accentColor} />
-              </ThemedView>
-              <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
-                Преподаватели
-              </ThemedText>
-            </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}>
+                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
+                  <IconSymbol name="calendar" size={24} color={theme.accentColor} />
+                </ThemedView>
+                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                  Расписание
+                </ThemedText>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-              disabled={true}>
-              <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                <IconSymbol name="books.vertical.fill" size={24} color={theme.accentColor} />
-              </ThemedView>
-              <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
-                Библиотека
-              </ThemedText>
-            </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}>
+                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
+                  <IconSymbol name="person.2.fill" size={24} color={theme.accentColor} />
+                </ThemedView>
+                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                  Преподаватели
+                </ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}>
+                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
+                  <IconSymbol name="books.vertical.fill" size={24} color={theme.accentColor} />
+                </ThemedView>
+                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                  Библиотека
+                </ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 80,
+    width: '100%',
+  } as ViewStyle,
+  scrollView: {
+    flex: 1,
+    width: '100%',
+  } as ViewStyle,
+  scrollContent: {
+    flexGrow: 1,
+    ...Platform.select({
+      web: webStyles,
+    }),
+  } as ViewStyle,
+  safeArea: {
+    flex: 1,
   },
   headerContainer: {
     marginTop: -20,

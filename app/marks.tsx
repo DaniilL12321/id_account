@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, View } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -153,7 +153,15 @@ function MarksContent() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <ScrollView
         style={[styles.container, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          Platform.OS === 'web' ? {
+            maxWidth: 768,
+            width: '100%',
+            marginHorizontal: 'auto',
+            paddingTop: 40,
+          } as ViewStyle : {}
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -241,6 +249,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingBottom: -40,
+    ...(Platform.OS === 'web' ? {
+      height: '100vh',
+      minHeight: '100vh',
+    } as unknown as ViewStyle : {}),
   },
   container: {
     flex: 1,
@@ -288,6 +300,9 @@ const styles = StyleSheet.create({
       android: {
         elevation: 4,
       },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+      } as unknown as ViewStyle,
     }),
   },
   cardHeader: {
@@ -339,6 +354,9 @@ const styles = StyleSheet.create({
       android: {
         elevation: 4,
       },
+      web: {
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+      } as unknown as ViewStyle,
     }),
   },
   markInfo: {

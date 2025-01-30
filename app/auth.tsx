@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, TouchableOpacity, View, Image, Alert, TextInput, KeyboardAvoidingView, Platform, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -25,6 +25,7 @@ function AuthContent() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
@@ -59,13 +60,51 @@ function AuthContent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Ошибка авторизации');
+        let errorMessage = 'Произошла ошибка при входе';
+        
+        if (response.status === 401 || response.status === 400) {
+          errorMessage = 'Неверный логин или пароль';
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+
+        throw new Error(errorMessage);
       }
 
       await AsyncStorage.setItem('auth_tokens', JSON.stringify(data));
       router.replace('/');
     } catch (error) {
-      Alert.alert('Ошибка', error instanceof Error ? error.message : 'Произошла ошибка');
+      if (Platform.OS === 'web') {
+        // Для веб используем кастомный алерт
+        const errorMessage = error instanceof Error ? error.message : 'Произошла ошибка';
+        const alertContainer = document.createElement('div');
+        alertContainer.style.position = 'fixed';
+        alertContainer.style.top = '20px';
+        alertContainer.style.left = '50%';
+        alertContainer.style.transform = 'translateX(-50%)';
+        alertContainer.style.backgroundColor = isDarkMode ? '#1D1D1D' : '#FFFFFF';
+        alertContainer.style.color = isDarkMode ? '#FFFFFF' : '#000000';
+        alertContainer.style.padding = '16px 24px';
+        alertContainer.style.borderRadius = '12px';
+        alertContainer.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        alertContainer.style.zIndex = '9999';
+        alertContainer.style.maxWidth = '90%';
+        alertContainer.style.width = 'auto';
+        alertContainer.style.textAlign = 'center';
+        alertContainer.innerText = errorMessage;
+        
+        document.body.appendChild(alertContainer);
+        
+        setTimeout(() => {
+          alertContainer.style.opacity = '0';
+          alertContainer.style.transition = 'opacity 0.3s ease';
+          setTimeout(() => {
+            document.body.removeChild(alertContainer);
+          }, 300);
+        }, 3000);
+      } else {
+        Alert.alert('Ошибка', error instanceof Error ? error.message : 'Произошла ошибка');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,22 +116,36 @@ function AuthContent() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
+        <View style={[
+          styles.content,
+          Platform.OS === 'web' ? {
+            maxWidth: 400,
+            width: '100%',
+            marginHorizontal: 'auto',
+            paddingTop: 80,
+          } as ViewStyle : {}
+        ]}>
           <View style={styles.header}>
             <Image
               source={require('@/assets/images/ystu-logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
-            <ThemedText style={[styles.title, { color: theme.textColor }]}>
+            <ThemedText style={styles.title}>
               ЯГТУ ID
             </ThemedText>
-            <ThemedText style={[styles.subtitle, { color: theme.secondaryText }]}>
+            <ThemedText style={styles.subtitle}>
               Единая система авторизации
             </ThemedText>
           </View>
 
-          <View style={[styles.form, { backgroundColor: theme.cardBackground }]}>
+          <View style={[
+            styles.form,
+            { backgroundColor: theme.cardBackground },
+            Platform.OS === 'web' ? {
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            } as ViewStyle : {}
+          ]}>
             <View style={styles.inputContainer}>
               <TextInput
                 style={[
@@ -108,9 +161,13 @@ function AuthContent() {
                 onChangeText={setLogin}
                 autoCapitalize="none"
                 autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
               />
               <View style={styles.passwordContainer}>
                 <TextInput
+                  ref={passwordRef}
                   style={[
                     styles.input,
                     styles.passwordInput,
@@ -124,6 +181,8 @@ function AuthContent() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
+                  returnKeyType="go"
+                  onSubmitEditing={handleLogin}
                 />
                 <TouchableOpacity
                   style={[styles.passwordToggle, { backgroundColor: theme.inputBackground }]}
@@ -176,6 +235,10 @@ function AuthContent() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    ...(Platform.OS === 'web' ? {
+      height: '100vh',
+      minHeight: '100vh',
+    } as unknown as ViewStyle : {}),
   },
   container: {
     flex: 1,

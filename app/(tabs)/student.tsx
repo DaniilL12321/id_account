@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View, ViewStyle } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { CheckResponse, UserDetailsResponse } from '@/types/api';
 import Constants from 'expo-constants';
 import { useTheme } from '@/app/context/theme';
+import { Container } from '@/components/ui/Container';
 
 const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
@@ -36,6 +37,10 @@ interface ThemeConfig {
   borderColor: string;
   accentColor: string;
 }
+
+const webStyles = {
+  minHeight: '100vh',
+} as unknown as ViewStyle;
 
 export default function StudentProfileScreen() {
   const { isDarkMode } = useTheme();
@@ -101,161 +106,170 @@ export default function StudentProfileScreen() {
 
   if (loading || error || !userInfo || !userDetails) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <ThemedView style={styles.loadingContainer}>
-          {loading ? (
-            <ThemedText>Загрузка...</ThemedText>
-          ) : (
-            <ThemedText style={styles.error}>{error || 'Не удалось загрузить данные'}</ThemedText>
-          )}
-        </ThemedView>
-      </SafeAreaView>
+      <Container>
+        <SafeAreaView style={styles.container}>
+          <ThemedView style={styles.loadingContainer}>
+            {loading ? (
+              <ThemedText>Загрузка...</ThemedText>
+            ) : (
+              <ThemedText style={styles.error}>{error || 'Не удалось загрузить данные'}</ThemedText>
+            )}
+          </ThemedView>
+        </SafeAreaView>
+      </Container>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <ScrollView 
-        style={[styles.container, { backgroundColor: theme.background }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
-          {userInfo.photoUrl ? (
-            <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
-          ) : (
-            <ThemedView style={[styles.avatarPlaceholder, { backgroundColor: theme.accentColor }]}>
-              <ThemedText style={styles.avatarText}>
-                {userInfo.firstName[0]}{userInfo.lastName[0]}
+    <Container>
+      <SafeAreaView style={styles.container}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { padding: 16, gap: 16, paddingBottom: 80 }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
+            {userInfo.photoUrl ? (
+              <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+            ) : (
+              <ThemedView style={[styles.avatarPlaceholder, { backgroundColor: theme.accentColor }]}>
+                <ThemedText style={styles.avatarText}>
+                  {userInfo.firstName[0]}{userInfo.lastName[0]}
+                </ThemedText>
+              </ThemedView>
+            )}
+            <ThemedText style={[styles.userName, { color: theme.textColor }]}>
+              {userInfo.firstName} {userInfo.lastName}
+            </ThemedText>
+            <ThemedText style={[styles.userGroup, { color: theme.secondaryText }]}>
+              {userInfo.groupName} • {userDetails.course} курс • {userDetails.sourceFinancingStr}
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <TouchableOpacity 
+              style={styles.sectionItem}
+              onPress={() => router.push('/info')}
+            >
+              <IconSymbol name="person.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Личная информация
               </ThemedText>
-            </ThemedView>
-          )}
-          <ThemedText style={[styles.userName, { color: theme.textColor }]}>
-            {userInfo.firstName} {userInfo.lastName}
-          </ThemedText>
-          <ThemedText style={[styles.userGroup, { color: theme.secondaryText }]}>
-            {userInfo.groupName} • {userDetails.course} курс • {userDetails.sourceFinancingStr}
-          </ThemedText>
-        </ThemedView>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
 
-        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity 
-            style={styles.sectionItem}
-            onPress={() => router.push('/info')}
-          >
-            <IconSymbol name="person.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Личная информация
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.sectionItem}
+              onPress={() => router.push('/marks')}
+            >
+              <IconSymbol name="chart.bar.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Полная успеваемость
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.sectionItem}
-            onPress={() => router.push('/marks')}
-          >
-            <IconSymbol name="chart.bar.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Полная успеваемость
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]} 
+              disabled={true}
+            >
+              <IconSymbol name="photo.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Портфолио
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+          </ThemedView>
 
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]} 
-            disabled={true}
-          >
-            <IconSymbol name="photo.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Портфолио
+          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <ThemedText style={[styles.sectionTitle, { color: theme.textColor }]}>
+              Документы
             </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-        </ThemedView>
+            
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol name="doc.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Справки
+              </ThemedText>
+              {/* <ThemedView style={styles.badge}>
+                <ThemedText style={styles.badgeText}>Новое</ThemedText>
+              </ThemedView> */}
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
 
-        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <ThemedText style={[styles.sectionTitle, { color: theme.textColor }]}>
-            Документы
-          </ThemedText>
-          
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]}
-            disabled={true}
-          >
-            <IconSymbol name="doc.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Справки
-            </ThemedText>
-            {/* <ThemedView style={styles.badge}>
-              <ThemedText style={styles.badgeText}>Новое</ThemedText>
-            </ThemedView> */}
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol name="doc.text.fill" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Заявления
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]}
-            disabled={true}
-          >
-            <IconSymbol name="doc.text.fill" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Заявления
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol name="qrcode" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                QR Сертификаты
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+          </ThemedView>
 
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]}
-            disabled={true}
-          >
-            <IconSymbol name="qrcode" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              QR Сертификаты
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-        </ThemedView>
+          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol name="gear" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Настройки профиля
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
 
-        <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]}
-            disabled={true}
-          >
-            <IconSymbol name="gear" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Настройки профиля
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.sectionItem, { opacity: 0.5 }]}
-            disabled={true}
-          >
-            <IconSymbol name="bell" size={20} color={theme.accentColor} />
-            <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
-              Уведомления
-            </ThemedText>
-            <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
-          </TouchableOpacity>
-        </ThemedView>
-      </ScrollView>
-    </SafeAreaView>
+            <TouchableOpacity 
+              style={[styles.sectionItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol name="bell" size={20} color={theme.accentColor} />
+              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+                Уведомления
+              </ThemedText>
+              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+            </TouchableOpacity>
+          </ThemedView>
+        </ScrollView>
+      </SafeAreaView>
+    </Container>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: Platform.OS === 'android' ? 20 : 80,
-    paddingTop: Platform.OS === 'android' ? 36 : 8,
-  },
+    width: '100%',
+  } as ViewStyle,
+  scrollView: {
+    flex: 1,
+    width: '100%',
+  } as ViewStyle,
+  scrollContent: {
+    flexGrow: 1,
+    ...Platform.select({
+      web: webStyles,
+    }),
+  } as ViewStyle,
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -358,3 +372,4 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
