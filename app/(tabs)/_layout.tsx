@@ -31,8 +31,24 @@ export default function TabLayout() {
             ios: {
               position: 'absolute',
             },
+            web: {
+              paddingTop: 8,
+              paddingBottom: 8,
+              height: 60,
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1000,
+            }
           }),
         },
+        tabBarLabelStyle: Platform.select({
+          web: {
+            fontSize: 12,
+            marginTop: 4,
+          }
+        }),
       }}>
       <Tabs.Screen
         name="index"

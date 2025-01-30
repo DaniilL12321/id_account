@@ -66,6 +66,25 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  const iconName = Platform.OS === 'android' ? iconMap[name] : (name as any);
-  return <Ionicons name={iconName} size={size} color={color} style={style} />;
+  const iconName = Platform.select({
+    ios: name as any,
+    default: iconMap[name]
+  });
+  
+  return (
+    <Ionicons 
+      name={iconName} 
+      size={size} 
+      color={color} 
+      style={[
+        style,
+        Platform.select({
+          web: {
+            cursor: 'pointer',
+            userSelect: 'none',
+          }
+        })
+      ]} 
+    />
+  );
 }
