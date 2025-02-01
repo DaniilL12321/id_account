@@ -9,6 +9,8 @@ import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
 import { router, Stack } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { GroupSelectModal } from './components/GroupSelectModal';
 
 const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
 
@@ -72,13 +74,6 @@ const webStyles = {
 } as unknown as ViewStyle;
 
 const MAX_WEB_WIDTH = 767;
-
-const getContainerWidth = () => {
-  if (Platform.OS === 'web') {
-    return Math.min(Dimensions.get('window').width, MAX_WEB_WIDTH);
-  }
-  return Dimensions.get('window').width;
-};
 
 const getMskDate = () => {
   const now = new Date();
@@ -156,16 +151,16 @@ const isCurrentSemester = (date: Date) => {
   const month = date.getMonth() + 1;
   const now = getMskDate();
   const currentMonth = now.getMonth() + 1;
-  
+
   // TODO: такой вот пока костыль, мб потом пофиксить
   // весенний семестр: январь-август
   const isSpring = month >= 1 && month <= 8;
   const currentSpring = currentMonth >= 1 && currentMonth <= 8;
-  
+
   // осенний семестр: сентябрь-декабрь
   const isFall = month >= 9 && month <= 12;
   const currentFall = currentMonth >= 9 && currentMonth <= 12;
-  
+
   return (isSpring && currentSpring) || (isFall && currentFall);
 };
 
@@ -178,6 +173,11 @@ export default function ScheduleScreen() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [currentWeekIndex, setCurrentWeekIndex] = useState<number>(0);
   const [fadeAnim] = useState(new Animated.Value(0.3));
+  const [scrollVelocity, setScrollVelocity] = useState(0);
+  const lastScrollX = useRef(0);
+  const lastScrollTime = useRef(Date.now());
+  const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
@@ -209,7 +209,7 @@ export default function ScheduleScreen() {
 
   const initializeCurrentSchedule = (scheduleData: ScheduleDay[]) => {
     const now = getMskDate();
-    
+
     const todaySchedule = scheduleData.find(day => {
       const scheduleDate = new Date(day.info.date);
       return scheduleDate.toDateString() === now.toDateString();
@@ -255,7 +255,7 @@ export default function ScheduleScreen() {
       }
 
       const counter = await updateRequestCounter();
-      
+
       const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
       const data: ScheduleResponse = await response.json();
 
@@ -268,10 +268,10 @@ export default function ScheduleScreen() {
 
       if (counter && counter.count >= REQUEST_LIMIT) {
         await setCachedSchedule(allDays);
-        
+
         setTimeout(async () => {
           await AsyncStorage.removeItem('schedule_cache');
-          await AsyncStorage.setItem('schedule_request_counter', 
+          await AsyncStorage.setItem('schedule_request_counter',
             JSON.stringify({ count: 0, timestamp: Date.now() })
           );
         }, CACHE_DURATION);
@@ -383,7 +383,7 @@ export default function ScheduleScreen() {
   useEffect(() => {
     if (weekScrollViewRef.current && !loading) {
       const scrollToOffset = currentWeekIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
-      
+
       if (Platform.OS === 'web') {
         weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: true });
       } else {
@@ -395,6 +395,77 @@ export default function ScheduleScreen() {
       }
     }
   }, [currentWeekIndex, loading]);
+
+  const handleDaySelect = async (date: string) => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedDay(date);
+  };
+
+  const handleScroll = (event: any) => {
+    const currentX = event.nativeEvent.contentOffset.x;
+    const currentTime = Date.now();
+    const deltaTime = currentTime - lastScrollTime.current;
+
+    const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+    const nearestWeekIndex = Math.round(currentX / weekWidth);
+    const currentWeekSchedule = groupScheduleByWeeks(schedule)[nearestWeekIndex];
+
+    if (currentWeekSchedule?.weekNumber !== currentWeekNumber) {
+      setCurrentWeekNumber(currentWeekSchedule?.weekNumber);
+      if (currentWeekSchedule?.days[0]) {
+        setSelectedDay(currentWeekSchedule.days[0].info.date);
+      }
+    }
+
+    if (Platform.OS !== 'web' && deltaTime > 0) {
+      const velocity = Math.abs(currentX - lastScrollX.current) / deltaTime;
+      setScrollVelocity(velocity);
+
+      if (velocity > 0.5) {
+        Haptics.impactAsync(
+          velocity > 2
+            ? Haptics.ImpactFeedbackStyle.Heavy
+            : Haptics.ImpactFeedbackStyle.Light
+        );
+      }
+    }
+
+    lastScrollX.current = currentX;
+    lastScrollTime.current = currentTime;
+  };
+
+  const handleWeekScroll = async (event: any) => {
+    const x = event.nativeEvent.contentOffset.x;
+
+    if (Platform.OS === 'web') {
+      const weekWidth = MAX_WEB_WIDTH - 16;
+      const nearestWeekIndex = Math.round(x / weekWidth);
+      const targetX = nearestWeekIndex * weekWidth;
+
+      if (Math.abs(x - targetX) > 1) {
+        weekScrollViewRef.current?.scrollTo({ x: targetX, animated: true });
+      }
+    } else {
+      const feedbackStyle = scrollVelocity > 2
+        ? Haptics.ImpactFeedbackStyle.Heavy
+        : scrollVelocity > 1
+          ? Haptics.ImpactFeedbackStyle.Medium
+          : Haptics.ImpactFeedbackStyle.Light;
+
+      await Haptics.impactAsync(feedbackStyle);
+    }
+
+    setScrollVelocity(0);
+  };
+
+  const handleGroupSelect = async (selectedGroup: string) => {
+    setGroupName(selectedGroup);
+    setLoading(true);
+    await fetchSchedule(selectedGroup);
+    setLoading(false);
+  };
 
   if (loading) {
     return (
@@ -444,8 +515,8 @@ export default function ScheduleScreen() {
                       width: '10%',
                       marginBottom: 16,
                       ...(Platform.OS === 'web' ? {
-                      width: '10%',
-                    } : {})
+                        width: '10%',
+                      } : {})
                     }
                   ]}
                 />
@@ -576,12 +647,15 @@ export default function ScheduleScreen() {
               <ThemedText style={[styles.title, { color: theme.textColor }]}>
                 Расписание
               </ThemedText>
-              <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
-                •
-              </ThemedText>
-              <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
-                {groupName}
-              </ThemedText>
+              <TouchableOpacity
+                onPress={() => setModalVisible(true)}
+                style={styles.groupButton}
+              >
+                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                  • {groupName}
+                </ThemedText>
+                <IconSymbol name="chevron.down" size={12} color={theme.secondaryText} />
+              </TouchableOpacity>
             </View>
 
             <ScrollView
@@ -593,16 +667,9 @@ export default function ScheduleScreen() {
               decelerationRate={Platform.OS === 'web' ? 0.1 : 'fast'}
               snapToAlignment="start"
               pagingEnabled={Platform.OS === 'web'}
-              onMomentumScrollEnd={Platform.OS === 'web' ? (event) => {
-                const weekWidth = MAX_WEB_WIDTH - 16;
-                const x = event.nativeEvent.contentOffset.x;
-                const nearestWeekIndex = Math.round(x / weekWidth);
-                const targetX = nearestWeekIndex * weekWidth;
-                
-                if (Math.abs(x - targetX) > 1) {
-                  weekScrollViewRef.current?.scrollTo({ x: targetX, animated: true });
-                }
-              } : undefined}
+              onScroll={handleScroll}
+              onMomentumScrollEnd={handleWeekScroll}
+              scrollEventThrottle={16}
               contentContainerStyle={Platform.OS === 'web' ? {
                 marginTop: 14,
                 maxWidth: MAX_WEB_WIDTH,
@@ -626,7 +693,7 @@ export default function ScheduleScreen() {
                       const date = new Date(day.info.date);
                       const isSelected = selectedDay === day.info.date;
                       const isToday = new Date(day.info.date).toDateString() === getMskDate().toDateString();
-                      
+
                       return (
                         <TouchableOpacity
                           key={day.info.date}
@@ -638,7 +705,12 @@ export default function ScheduleScreen() {
                               opacity: isToday ? 1 : 0.8,
                             }
                           ]}
-                          onPress={() => setSelectedDay(day.info.date)}
+                          onPress={() => handleDaySelect(day.info.date)}
+                          onLongPress={async () => {
+                            if (Platform.OS !== 'web') {
+                              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                            }
+                          }}
                         >
                           <ThemedText
                             style={[
@@ -685,7 +757,7 @@ export default function ScheduleScreen() {
                       }
                     ]}
                   >
-                    <ThemedView style={styles.lessonTime}>
+                    <ThemedView style={[styles.lessonTime, { justifyContent: lesson.timeRange ? 'space-between' : 'center' }]}>
                       {lesson.timeRange ? (
                         <>
                           <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
@@ -696,8 +768,8 @@ export default function ScheduleScreen() {
                           </ThemedText>
                         </>
                       ) : (
-                        <ThemedText style={[styles.examTime, { color: typeInfo.color }]}>
-                          Весь день
+                        <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
+                          ∞
                         </ThemedText>
                       )}
                     </ThemedView>
@@ -754,6 +826,13 @@ export default function ScheduleScreen() {
           </ScrollView>
         </SafeAreaView>
       </Container>
+      <GroupSelectModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSelect={handleGroupSelect}
+        theme={theme}
+        currentGroup={groupName}
+      />
     </>
   );
 }
@@ -828,6 +907,13 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  infinitySymbol: {
+    fontSize: 20,
+    fontWeight: '400',
+    lineHeight: 20,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
   weekTitle: {
     marginTop: -10,
     fontSize: 13,
@@ -897,8 +983,8 @@ const styles = StyleSheet.create({
   },
   lessonTime: {
     width: 45,
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   timeText: {
     fontSize: 13,
@@ -951,5 +1037,10 @@ const styles = StyleSheet.create({
     minWidth: Platform.OS === 'web'
       ? (MAX_WEB_WIDTH - 32 - 32 - 40) / 7
       : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+  },
+  groupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 }); 

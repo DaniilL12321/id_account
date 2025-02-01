@@ -16,6 +16,7 @@ import Animated, {
   useSharedValue,
   withDelay
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 const { API_URL } = Constants.expoConfig?.extra || {};
 
@@ -233,6 +234,34 @@ function MarksContent() {
     });
   const averageGrade = calculateAverageGrade(marks);
 
+  const handleSemesterChange = async (semester: number) => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedSemester(semester);
+  };
+
+  const handleBackPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.back();
+  };
+
+  const handleMarkPress = async (mark: Mark) => {
+    if (Platform.OS !== 'web') {
+      if (mark.mark === 5) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else if (mark.mark === 2) {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } else if (mark.mark === 0) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -267,7 +296,7 @@ function MarksContent() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={handleBackPress}>
             <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
           </TouchableOpacity>
           <ThemedText style={[styles.title, { color: theme.textColor }]}>
@@ -301,7 +330,7 @@ function MarksContent() {
                   backgroundColor: selectedSemester === semester ? theme.accentColor : theme.cardBackground,
                 },
               ]}
-              onPress={() => setSelectedSemester(semester)}
+              onPress={() => handleSemesterChange(semester)}
             >
               <ThemedText
                 style={[
@@ -317,29 +346,33 @@ function MarksContent() {
 
         <View style={styles.marksList}>
           {filteredMarks.map((mark, index) => (
-            <ThemedView
+            <TouchableOpacity
               key={index}
-              style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
+              onPress={() => handleMarkPress(mark)}
             >
-              <View style={styles.markInfo}>
-                <ThemedText style={[styles.disciplineName, { color: theme.textColor }]}>
-                  {mark.lessonName}
-                </ThemedText>
-                <ThemedText style={[styles.markType, { color: theme.secondaryText }]}>
-                  {mark.controlTypeName}
-                </ThemedText>
-              </View>
-              <View
-                style={[
-                  styles.markBadge,
-                  { backgroundColor: getMarkColor(mark) }
-                ]}
+              <ThemedView
+                style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
               >
-                <ThemedText style={styles.markValue}>
-                  {getMarkDisplay(mark)}
-                </ThemedText>
-              </View>
-            </ThemedView>
+                <View style={styles.markInfo}>
+                  <ThemedText style={[styles.disciplineName, { color: theme.textColor }]}>
+                    {mark.lessonName}
+                  </ThemedText>
+                  <ThemedText style={[styles.markType, { color: theme.secondaryText }]}>
+                    {mark.controlTypeName}
+                  </ThemedText>
+                </View>
+                <View
+                  style={[
+                    styles.markBadge,
+                    { backgroundColor: getMarkColor(mark) }
+                  ]}
+                >
+                  <ThemedText style={styles.markValue}>
+                    {getMarkDisplay(mark)}
+                  </ThemedText>
+                </View>
+              </ThemedView>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>

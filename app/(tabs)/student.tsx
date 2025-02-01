@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View, ViewStyle, Modal, Pressable } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -17,6 +17,8 @@ import Animated, {
   useSharedValue,
   withDelay
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
 
 const { OAUTH_URL, API_URL } = Constants.expoConfig?.extra || {};
 
@@ -141,6 +143,7 @@ export default function StudentProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<CheckResponse['auth_info']['user'] | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
@@ -197,6 +200,35 @@ export default function StudentProfileScreen() {
     }
   };
 
+  const handleInfoPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    router.push('/info');
+  };
+
+  const handleMarksPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.push('/marks');
+  };
+
+  const handleDisabledPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    }
+  };
+
+  const handleAvatarPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (userInfo?.photoUrl) {
+      setIsImageModalVisible(true);
+    }
+  };
+
   if (loading || error || !userInfo || !userDetails) {
     return (
       <Container>
@@ -226,7 +258,9 @@ export default function StudentProfileScreen() {
         >
           <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
             {userInfo.photoUrl ? (
-              <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+              <TouchableOpacity onPress={handleAvatarPress}>
+                <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+              </TouchableOpacity>
             ) : (
               <ThemedView style={[styles.avatarPlaceholder, { backgroundColor: theme.accentColor }]}>
                 <ThemedText style={styles.avatarText}>
@@ -245,7 +279,7 @@ export default function StudentProfileScreen() {
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
             <TouchableOpacity 
               style={styles.sectionItem}
-              onPress={() => router.push('/info')}
+              onPress={handleInfoPress}
             >
               <IconSymbol name="person.fill" size={20} color={theme.accentColor} />
               <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
@@ -256,7 +290,7 @@ export default function StudentProfileScreen() {
 
             <TouchableOpacity 
               style={styles.sectionItem}
-              onPress={() => router.push('/marks')}
+              onPress={handleMarksPress}
             >
               <IconSymbol name="chart.bar.fill" size={20} color={theme.accentColor} />
               <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
@@ -267,6 +301,7 @@ export default function StudentProfileScreen() {
 
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]} 
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="photo.fill" size={20} color={theme.accentColor} />
@@ -284,6 +319,7 @@ export default function StudentProfileScreen() {
             
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]}
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="doc.fill" size={20} color={theme.accentColor} />
@@ -298,6 +334,7 @@ export default function StudentProfileScreen() {
 
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]}
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="doc.text.fill" size={20} color={theme.accentColor} />
@@ -309,6 +346,7 @@ export default function StudentProfileScreen() {
 
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]}
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="qrcode" size={20} color={theme.accentColor} />
@@ -322,6 +360,7 @@ export default function StudentProfileScreen() {
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]}
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="gear" size={20} color={theme.accentColor} />
@@ -333,6 +372,7 @@ export default function StudentProfileScreen() {
 
             <TouchableOpacity 
               style={[styles.sectionItem, { opacity: 0.5 }]}
+              onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="bell" size={20} color={theme.accentColor} />
@@ -343,6 +383,37 @@ export default function StudentProfileScreen() {
             </TouchableOpacity>
           </ThemedView>
         </ScrollView>
+
+        <Modal
+          visible={isImageModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsImageModalVisible(false)}
+        >
+          <BlurView intensity={100} style={styles.modalContainer}>
+            <Pressable 
+              style={styles.modalContent}
+              onPress={async () => {
+                if (Platform.OS !== 'web') {
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                setIsImageModalVisible(false);
+              }}
+            >
+              <Image
+                source={{ uri: userInfo?.photoUrl }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+              <IconSymbol 
+                name="xmark.circle.fill" 
+                size={32} 
+                color="white" 
+                style={styles.closeButton}
+              />
+            </Pressable>
+          </BlurView>
+        </Modal>
       </SafeAreaView>
     </Container>
   );
@@ -463,6 +534,40 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: '500',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalImage: {
+    width: '120%',
+    aspectRatio: 1,
+    maxWidth: 315,
+    borderRadius: 16,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
 });
 
