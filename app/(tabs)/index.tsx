@@ -311,19 +311,6 @@ export default function HomeScreen() {
     red: '#FF3B30',
   };
 
-  const getDateWithOffset = (offset: number) => {
-    const now = new Date();
-    const mskOffset = 3;
-    now.setHours(now.getHours() + mskOffset);
-
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const day = now.getUTCDate();
-
-    const date = new Date(Date.UTC(year, month, day + offset));
-    return date.toISOString().split('T')[0];
-  };
-
   const fetchUserInfo = async (accessToken: string) => {
     try {
       const response = await fetch(`${OAUTH_URL}/check`, {
@@ -358,8 +345,7 @@ export default function HomeScreen() {
       const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<DayOffset, Lesson[]>;
 
       const now = new Date();
-      const mskOffset = 21;
-      now.setHours(now.getHours() + mskOffset);
+      now.setHours(now.getHours());
 
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
@@ -367,7 +353,7 @@ export default function HomeScreen() {
 
       [0, 1, 2].forEach((offset) => {
         const targetDate = new Date(now);
-        targetDate.setDate(targetDate.getDate() + offset - 1);
+        targetDate.setDate(targetDate.getDate() + offset);
         const targetDateStr = targetDate.toISOString().split('T')[0];
 
         console.log('Looking for date:', targetDateStr);
@@ -570,9 +556,8 @@ export default function HomeScreen() {
 
   const getDayNumber = (offset: number) => {
     const date = new Date();
-    const mskOffset = 21;
-    date.setHours(date.getHours() + mskOffset);
-    date.setDate(date.getDate() + offset - 1);
+    date.setHours(date.getHours());
+    date.setDate(date.getDate() + offset);
     return date.getDate();
   };
 
