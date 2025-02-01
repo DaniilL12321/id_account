@@ -48,6 +48,9 @@ interface ThemeConfig {
 
 const webStyles = {
   minHeight: '100vh',
+  marginTop: 16,
+  margin: -16,
+  paddingBottom: 80,
 } as unknown as ViewStyle;
 
 const SkeletonLoader = ({ style }: { style: ViewStyle }) => {

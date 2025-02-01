@@ -18,6 +18,7 @@ import Animated, {
   useSharedValue,
   withDelay
 } from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
 
@@ -103,6 +104,9 @@ const DAY_LABELS: Record<DayOffset, string> = {
 
 const webStyles = {
   minHeight: '100vh',
+  marginTop: 16,
+  margin: -16,
+  paddingBottom: 80,
 } as unknown as ViewStyle;
 
 const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
@@ -245,6 +249,42 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
   );
 };
 
+interface CachedSchedule {
+  timestamp: number;
+  data: Record<DayOffset, Lesson[]>;
+}
+
+const CACHE_DURATION = 20000;
+
+const getCachedSchedule = async () => {
+  try {
+    const cached = await AsyncStorage.getItem('home_schedule_cache');
+    if (cached) {
+      const parsedCache: CachedSchedule = JSON.parse(cached);
+      const now = Date.now();
+      if (now - parsedCache.timestamp < CACHE_DURATION) {
+        return parsedCache.data;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error reading cache:', error);
+    return null;
+  }
+};
+
+const setCachedSchedule = async (data: Record<DayOffset, Lesson[]>) => {
+  try {
+    const cacheData: CachedSchedule = {
+      timestamp: Date.now(),
+      data,
+    };
+    await AsyncStorage.setItem('home_schedule_cache', JSON.stringify(cacheData));
+  } catch (error) {
+    console.error('Error setting cache:', error);
+  }
+};
+
 export default function HomeScreen() {
   const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -305,6 +345,12 @@ export default function HomeScreen() {
 
   const fetchSchedule = async (groupName: string) => {
     try {
+      const cachedData = await getCachedSchedule();
+      if (cachedData) {
+        setSchedule(cachedData);
+        return;
+      }
+
       const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
       const data: ScheduleResponse = await response.json();
 
@@ -312,7 +358,7 @@ export default function HomeScreen() {
       const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<DayOffset, Lesson[]>;
 
       const now = new Date();
-      const mskOffset = 3;
+      const mskOffset = 21;
       now.setHours(now.getHours() + mskOffset);
 
       const currentMonth = now.getMonth() + 1;
@@ -321,7 +367,7 @@ export default function HomeScreen() {
 
       [0, 1, 2].forEach((offset) => {
         const targetDate = new Date(now);
-        targetDate.setDate(targetDate.getDate() + offset);
+        targetDate.setDate(targetDate.getDate() + offset - 1);
         const targetDateStr = targetDate.toISOString().split('T')[0];
 
         console.log('Looking for date:', targetDateStr);
@@ -368,6 +414,8 @@ export default function HomeScreen() {
       });
 
       console.log('Final schedule:', newSchedule);
+
+      await setCachedSchedule(newSchedule);
       setSchedule(newSchedule);
     } catch (error) {
       console.error('Error fetching schedule:', error);
@@ -475,6 +523,24 @@ export default function HomeScreen() {
     });
   };
 
+  const handleDaySelect = async (day: DayOffset) => {
+    if (Platform.OS !== 'web') {
+      await Haptics.selectionAsync();
+    }
+    setSelectedDay(day);
+  };
+
+  const handleQuickAction = async (action: string) => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    switch (action) {
+      case 'schedule':
+        router.push('/schedule');
+        break;
+    }
+  };
+
   if (loading) {
     return (
       <Container>
@@ -500,6 +566,14 @@ export default function HomeScreen() {
       default:
         return { label: '', color: '#8E8E93' };
     }
+  };
+
+  const getDayNumber = (offset: number) => {
+    const date = new Date();
+    const mskOffset = 21;
+    date.setHours(date.getHours() + mskOffset);
+    date.setDate(date.getDate() + offset - 1);
+    return date.getDate();
   };
 
   return (
@@ -537,7 +611,13 @@ export default function HomeScreen() {
               <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
                 Успеваемость
               </ThemedText>
-              <TouchableOpacity onPress={() => router.push('/marks')}>
+              <TouchableOpacity 
+                onPress={async () => {
+                  if (Platform.OS !== 'web') {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  router.push('/marks');
+                }}>
                 <ThemedText style={{ color: theme.accentColor }}>
                   Подробнее
                 </ThemedText>
@@ -605,7 +685,14 @@ export default function HomeScreen() {
                   {userInfo?.groupName}
                 </ThemedText>
               </ThemedView>
-              <TouchableOpacity onPress={() => router.push('/schedule')}>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (Platform.OS !== 'web') {
+                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  router.push('/schedule');
+                }}
+              >
                 <ThemedText style={{ color: theme.accentColor }}>
                   Всё расписание
                 </ThemedText>
@@ -632,8 +719,16 @@ export default function HomeScreen() {
                         },
                       }),
                     ]}
-                    onPress={() => setSelectedDay(Number(key) as DayOffset)}
+                    onPress={() => handleDaySelect(Number(key) as DayOffset)}
                   >
+                    <ThemedText
+                      style={[
+                        styles.dayNumber,
+                        { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
+                      ]}
+                    >
+                      {getDayNumber(Number(key))}
+                    </ThemedText>
                     <ThemedText
                       style={[
                         styles.segmentText,
@@ -733,7 +828,13 @@ export default function HomeScreen() {
             </ThemedView>
 
             <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
-              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
+              <TouchableOpacity 
+                style={[styles.actionButton, { opacity: 0.5 }]}
+                onPress={async () => {
+                  if (Platform.OS !== 'web') {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                  }
+                }}
                 disabled={true}>
                 <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
                   <IconSymbol name="doc.fill" size={24} color={theme.accentColor} />
@@ -743,8 +844,11 @@ export default function HomeScreen() {
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.actionButton]}
-                onPress={() => router.push('/schedule')}>
+              <TouchableOpacity 
+                style={[styles.actionButton]}
+                onPress={async () => {
+                  await handleQuickAction('schedule');
+                }}>
                 <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
                   <IconSymbol name="calendar" size={24} color={theme.accentColor} />
                 </ThemedView>
@@ -885,14 +989,15 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 2,
     paddingHorizontal: 8,
     alignItems: 'center',
     borderRadius: 10,
     backgroundColor: 'transparent',
   },
   segmentText: {
-    fontSize: 13,
+    marginTop: -8,
+    fontSize: 12,
     fontWeight: '600',
   },
   scheduleList: {
@@ -1000,5 +1105,10 @@ const styles = StyleSheet.create({
   groupText: {
     marginTop: 1,
     fontSize: 12,
-  }
+  },
+  dayNumber: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
 });

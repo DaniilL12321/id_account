@@ -54,6 +54,11 @@ interface WeekSchedule {
   days: ScheduleDay[];
 }
 
+interface RequestCounter {
+  count: number;
+  timestamp: number;
+}
+
 interface CachedSchedule {
   timestamp: number;
   data: ScheduleDay[];
@@ -61,9 +66,12 @@ interface CachedSchedule {
 
 const webStyles = {
   minHeight: '100vh',
+  marginTop: 16,
+  margin: -16,
+  paddingBottom: 80,
 } as unknown as ViewStyle;
 
-const MAX_WEB_WIDTH = 735;
+const MAX_WEB_WIDTH = 767;
 
 const getContainerWidth = () => {
   if (Platform.OS === 'web') {
@@ -74,12 +82,46 @@ const getContainerWidth = () => {
 
 const getMskDate = () => {
   const now = new Date();
-  const mskOffset = 3;
   const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-  return new Date(utc + (3600000 * mskOffset));
+  return new Date(utc);
 };
 
 const CACHE_DURATION = 20000;
+const REQUEST_LIMIT = 4;
+
+const getRequestCounter = async (): Promise<RequestCounter> => {
+  try {
+    const counter = await AsyncStorage.getItem('schedule_request_counter');
+    if (counter) {
+      const parsed = JSON.parse(counter);
+      const now = Date.now();
+      if (now - parsed.timestamp > CACHE_DURATION) {
+        return { count: 0, timestamp: now };
+      }
+      return parsed;
+    }
+    return { count: 0, timestamp: Date.now() };
+  } catch (error) {
+    console.error('Error reading request counter:', error);
+    return { count: 0, timestamp: Date.now() };
+  }
+};
+
+const updateRequestCounter = async () => {
+  try {
+    const counter = await getRequestCounter();
+    const now = Date.now();
+    const newCounter = {
+      count: counter.count + 1,
+      timestamp: counter.timestamp
+    };
+    await AsyncStorage.setItem('schedule_request_counter', JSON.stringify(newCounter));
+    return newCounter;
+  } catch (error) {
+    console.error('Error updating request counter:', error);
+    return null;
+  }
+};
 
 const getCachedSchedule = async () => {
   try {
@@ -108,6 +150,23 @@ const setCachedSchedule = async (data: ScheduleDay[]) => {
   } catch (error) {
     console.error('Error setting cache:', error);
   }
+};
+
+const isCurrentSemester = (date: Date) => {
+  const month = date.getMonth() + 1;
+  const now = getMskDate();
+  const currentMonth = now.getMonth() + 1;
+  
+  // TODO: такой вот пока костыль, мб потом пофиксить
+  // весенний семестр: январь-август
+  const isSpring = month >= 1 && month <= 8;
+  const currentSpring = currentMonth >= 1 && currentMonth <= 8;
+  
+  // осенний семестр: сентябрь-декабрь
+  const isFall = month >= 9 && month <= 12;
+  const currentFall = currentMonth >= 9 && currentMonth <= 12;
+  
+  return (isSpring && currentSpring) || (isFall && currentFall);
 };
 
 export default function ScheduleScreen() {
@@ -150,43 +209,38 @@ export default function ScheduleScreen() {
 
   const initializeCurrentSchedule = (scheduleData: ScheduleDay[]) => {
     const now = getMskDate();
-    const today = now.toISOString().split('T')[0];
+    
+    const todaySchedule = scheduleData.find(day => {
+      const scheduleDate = new Date(day.info.date);
+      return scheduleDate.toDateString() === now.toDateString();
+    });
 
     const weeks = Array.from(new Set(scheduleData.map(day => day.info.weekNumber)))
       .sort((a, b) => a - b);
 
-    const currentWeek = scheduleData.find(day => {
-      const date = new Date(day.info.date);
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay() + 1);
-      weekStart.setHours(0, 0, 0, 0);
-      const weekEnd = new Date(date);
-      weekEnd.setDate(date.getDate() + (7 - date.getDay()));
-      weekEnd.setHours(23, 59, 59, 999);
-
-      return now >= weekStart && now <= weekEnd;
-    });
-
-    if (currentWeek) {
-      const weekIndex = weeks.indexOf(currentWeek.info.weekNumber);
-      setCurrentWeekIndex(Math.max(0, weekIndex));
-      setSelectedWeek(Math.max(0, weekIndex));
+    if (todaySchedule) {
+      const weekIndex = weeks.indexOf(todaySchedule.info.weekNumber);
+      setCurrentWeekIndex(weekIndex);
+      setSelectedWeek(weekIndex);
+      setSelectedDay(todaySchedule.info.date);
+      return;
     }
 
-    const todaySchedule = scheduleData.find(day => {
-      const scheduleDate = new Date(day.info.date);
-      const scheduleDay = scheduleDate.toISOString().split('T')[0];
-      return scheduleDay === today;
-    });
+    const nextDay = scheduleData.find(day => new Date(day.info.date) > now);
+    if (nextDay) {
+      const weekIndex = weeks.indexOf(nextDay.info.weekNumber);
+      setCurrentWeekIndex(weekIndex);
+      setSelectedWeek(weekIndex);
+      setSelectedDay(nextDay.info.date);
+      return;
+    }
 
-    if (todaySchedule) {
-      setSelectedDay(todaySchedule.info.date);
-    } else {
-      const nextDay = scheduleData
-        .find(day => new Date(day.info.date) > now);
-      if (nextDay) {
-        setSelectedDay(nextDay.info.date);
-      }
+    const lastDay = scheduleData[scheduleData.length - 1];
+    if (lastDay) {
+      const weekIndex = weeks.indexOf(lastDay.info.weekNumber);
+      setCurrentWeekIndex(weekIndex);
+      setSelectedWeek(weekIndex);
+      setSelectedDay(lastDay.info.date);
     }
   };
 
@@ -200,17 +254,28 @@ export default function ScheduleScreen() {
         return;
       }
 
+      const counter = await updateRequestCounter();
+      
       const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
       const data: ScheduleResponse = await response.json();
 
       const allDays = data.items.flatMap(item => item.days)
         .filter(day => {
           const date = new Date(day.info.date);
-          return date >= new Date();
+          return isCurrentSemester(date);
         })
         .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime());
 
-      await setCachedSchedule(allDays);
+      if (counter && counter.count >= REQUEST_LIMIT) {
+        await setCachedSchedule(allDays);
+        
+        setTimeout(async () => {
+          await AsyncStorage.removeItem('schedule_cache');
+          await AsyncStorage.setItem('schedule_request_counter', 
+            JSON.stringify({ count: 0, timestamp: Date.now() })
+          );
+        }, CACHE_DURATION);
+      }
 
       setSchedule(allDays);
       initializeCurrentSchedule(allDays);
@@ -223,6 +288,16 @@ export default function ScheduleScreen() {
 
   useEffect(() => {
     const init = async () => {
+      const cached = await AsyncStorage.getItem('schedule_cache');
+      if (cached) {
+        const parsedCache: CachedSchedule = JSON.parse(cached);
+        const now = Date.now();
+        if (now - parsedCache.timestamp > CACHE_DURATION) {
+          await AsyncStorage.removeItem('schedule_cache');
+          await AsyncStorage.removeItem('schedule_request_counter');
+        }
+      }
+
       const tokens = await AsyncStorage.getItem('auth_tokens');
       if (!tokens) {
         router.replace('/auth');
@@ -308,7 +383,16 @@ export default function ScheduleScreen() {
   useEffect(() => {
     if (weekScrollViewRef.current && !loading) {
       const scrollToOffset = currentWeekIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
-      weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: true });
+      
+      if (Platform.OS === 'web') {
+        weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: true });
+      } else {
+        setTimeout(() => {
+          if (weekScrollViewRef.current) {
+            weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
+          }
+        }, 100);
+      }
     }
   }, [currentWeekIndex, loading]);
 
@@ -506,8 +590,19 @@ export default function ScheduleScreen() {
               showsHorizontalScrollIndicator={false}
               style={styles.weekSelector}
               snapToInterval={Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16}
-              decelerationRate="fast"
+              decelerationRate={Platform.OS === 'web' ? 0.1 : 'fast'}
               snapToAlignment="start"
+              pagingEnabled={Platform.OS === 'web'}
+              onMomentumScrollEnd={Platform.OS === 'web' ? (event) => {
+                const weekWidth = MAX_WEB_WIDTH - 16;
+                const x = event.nativeEvent.contentOffset.x;
+                const nearestWeekIndex = Math.round(x / weekWidth);
+                const targetX = nearestWeekIndex * weekWidth;
+                
+                if (Math.abs(x - targetX) > 1) {
+                  weekScrollViewRef.current?.scrollTo({ x: targetX, animated: true });
+                }
+              } : undefined}
               contentContainerStyle={Platform.OS === 'web' ? {
                 marginTop: 14,
                 maxWidth: MAX_WEB_WIDTH,
@@ -530,6 +625,8 @@ export default function ScheduleScreen() {
                     {week.days.map((day) => {
                       const date = new Date(day.info.date);
                       const isSelected = selectedDay === day.info.date;
+                      const isToday = new Date(day.info.date).toDateString() === getMskDate().toDateString();
+                      
                       return (
                         <TouchableOpacity
                           key={day.info.date}
@@ -537,26 +634,27 @@ export default function ScheduleScreen() {
                             styles.dayButton,
                             {
                               backgroundColor: isSelected ? theme.accentColor : theme.background,
-                              borderColor: theme.borderColor
+                              borderColor: theme.borderColor,
+                              opacity: isToday ? 1 : 0.8,
                             }
                           ]}
                           onPress={() => setSelectedDay(day.info.date)}
                         >
                           <ThemedText
                             style={[
-                              styles.dayName,
+                              styles.dayNumber,
                               { color: isSelected ? '#FFFFFF' : theme.textColor }
                             ]}
                           >
-                            {date.toLocaleDateString('ru-RU', { weekday: 'short' })}
+                            {date.getDate()}
                           </ThemedText>
                           <ThemedText
                             style={[
-                              styles.dayNumber,
+                              styles.dayName,
                               { color: isSelected ? '#FFFFFF' : theme.secondaryText }
                             ]}
                           >
-                            {date.getDate()}
+                            {date.toLocaleDateString('ru-RU', { weekday: 'short' })}
                           </ThemedText>
                         </TouchableOpacity>
                       );
@@ -661,11 +759,21 @@ export default function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    paddingBottom: -40,
+    ...(Platform.OS === 'web' ? {
+      height: '100vh',
+      minHeight: '100vh',
+    } as unknown as ViewStyle : {}),
+  },
   container: {
     flex: 1,
   },
-  safeArea: {
-    flex: 1,
+  content: {
+    padding: 16,
+    gap: 16,
+    paddingBottom: 40,
   },
   scrollView: {
     flex: 1,
@@ -742,15 +850,15 @@ const styles = StyleSheet.create({
       ? (MAX_WEB_WIDTH - 32 - 32 - 40) / 7
       : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
   },
+  dayNumber: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
   dayName: {
     fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  dayNumber: {
-    fontSize: 15,
     fontWeight: '500',
-    marginTop: 4,
+    textTransform: 'uppercase',
   },
   dayCard: {
     borderRadius: 16,

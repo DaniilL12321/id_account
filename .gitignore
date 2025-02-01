@@ -39,3 +39,4 @@ yarn-error.*
 .env
 
 app-example
+expo.app.config.ts
