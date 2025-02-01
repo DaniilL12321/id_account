@@ -467,6 +467,13 @@ export default function ScheduleScreen() {
     setLoading(false);
   };
 
+  const handleBackPress = async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.back();
+  };
+
   if (loading) {
     return (
       <>
@@ -482,7 +489,7 @@ export default function ScheduleScreen() {
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={handleBackPress}>
                   <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
                 </TouchableOpacity>
                 <ThemedText style={[styles.title, { color: theme.textColor }]}>
@@ -641,7 +648,7 @@ export default function ScheduleScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
-              <TouchableOpacity onPress={() => router.back()}>
+              <TouchableOpacity onPress={handleBackPress}>
                 <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
               </TouchableOpacity>
               <ThemedText style={[styles.title, { color: theme.textColor }]}>

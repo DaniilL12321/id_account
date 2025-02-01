@@ -21,6 +21,16 @@ interface Department {
   groups: string[];
 }
 
+interface CourseGroups {
+  course: number;
+  groups: string[];
+}
+
+interface DepartmentWithCourses {
+  name: string;
+  courses: CourseGroups[];
+}
+
 interface GroupSelectModalProps {
   visible: boolean;
   onClose: () => void;
@@ -53,14 +63,33 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
     }
   };
 
-  const filteredDepartments = departments.map(dept => ({
-    name: dept.name,
-    groups: [...new Set(dept.groups)]
-      .filter(group => 
-        group.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .sort((a, b) => a.localeCompare(b))
-  })).filter(dept => dept.groups.length > 0);
+  const filteredDepartments = departments.map((dept: Department) => {
+    const courseGroups = dept.groups.reduce((acc: { [key: number]: string[] }, group: string) => {
+      const courseMatch = group.match(/-(\d)/);
+      const course = courseMatch ? parseInt(courseMatch[1]) : 0;
+      
+      if (!acc[course]) {
+        acc[course] = [];
+      }
+      acc[course].push(group);
+      return acc;
+    }, {});
+
+    const courses = Object.entries(courseGroups).map(([course, groups]) => ({
+      course: parseInt(course),
+      groups: [...new Set(groups)]
+        .filter(group => 
+          group.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => a.localeCompare(b))
+    })).filter(course => course.course > 0)
+    .sort((a, b) => a.course - b.course);
+
+    return {
+      name: dept.name,
+      courses
+    };
+  }).filter(dept => dept.courses.some(course => course.groups.length > 0));
 
   return (
     <Modal
@@ -106,40 +135,47 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                   <ThemedText style={[styles.departmentName, { color: theme.secondaryText }]}>
                     {dept.name}
                   </ThemedText>
-                  <View style={styles.groupsGrid}>
-                    {dept.groups.map((group, groupIndex) => (
-                      <TouchableOpacity
-                        key={groupIndex}
-                        style={[
-                          styles.groupButton,
-                          { 
-                            backgroundColor: theme.background,
-                            borderColor: theme.borderColor,
-                            ...(currentGroup === group && {
-                              borderColor: theme.accentColor,
-                            })
-                          }
-                        ]}
-                        onPress={() => {
-                          onSelect(group);
-                          onClose();
-                        }}
-                      >
-                        <View style={styles.groupButtonContent}>
-                          <ThemedText style={{ color: theme.textColor }}>
-                            {group}
-                          </ThemedText>
-                          {currentGroup === group && (
-                            <IconSymbol 
-                              name="checkmark" 
-                              size={16} 
-                              color={theme.accentColor}
-                            />
-                          )}
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                  {dept.courses.map((course, courseIndex) => (
+                    <View key={courseIndex} style={styles.courseSection}>
+                      <ThemedText style={[styles.courseName]}>
+                        {course.course} курс
+                      </ThemedText>
+                      <View style={styles.groupsGrid}>
+                        {course.groups.map((group, groupIndex) => (
+                          <TouchableOpacity
+                            key={groupIndex}
+                            style={[
+                              styles.groupButton,
+                              { 
+                                backgroundColor: theme.background,
+                                borderColor: theme.borderColor,
+                                ...(currentGroup === group && {
+                                  borderColor: theme.accentColor,
+                                })
+                              }
+                            ]}
+                            onPress={() => {
+                              onSelect(group);
+                              onClose();
+                            }}
+                          >
+                            <View style={styles.groupButtonContent}>
+                              <ThemedText style={{ color: theme.textColor }}>
+                                {group}
+                              </ThemedText>
+                              {currentGroup === group && (
+                                <IconSymbol 
+                                  name="checkmark" 
+                                  size={16} 
+                                  color={theme.accentColor}
+                                />
+                              )}
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
                 </View>
               ))}
             </ScrollView>
@@ -218,6 +254,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 12,
+  },
+  courseSection: {
+    marginBottom: 8,
+  },
+  courseName: {
+    color: '#1576d9',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 4,
   },
   groupsGrid: {
     flexDirection: 'row',
