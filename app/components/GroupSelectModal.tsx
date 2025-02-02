@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -7,7 +7,8 @@ import {
   ScrollView,
   TextInput,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  Animated
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -44,6 +45,45 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const contentTranslateY = useRef(new Animated.Value(-100)).current;
+
+  useEffect(() => {
+    if (visible) {
+      setIsClosing(false);
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(contentTranslateY, {
+          toValue: 0,
+          tension: 65,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else if (!isClosing) {
+      setIsClosing(true);
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(contentTranslateY, {
+          toValue: -100,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setIsClosing(false);
+      });
+    }
+  }, [visible]);
 
   useEffect(() => {
     fetchGroups();
@@ -90,6 +130,162 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
       courses
     };
   }).filter(dept => dept.courses.some(course => course.groups.length > 0));
+
+  const handleClose = () => {
+    if (Platform.OS === 'web') {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(contentTranslateY, {
+          toValue: -100,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        onClose();
+      });
+    } else {
+      onClose();
+    }
+  };
+
+  const handleGroupSelect = (group: string) => {
+    if (Platform.OS === 'web') {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(contentTranslateY, {
+          toValue: -100,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        onSelect(group);
+        onClose();
+      });
+    } else {
+      onSelect(group);
+      onClose();
+    }
+  };
+
+  if (Platform.OS === 'web') {
+    return (
+      <Modal
+        visible={visible || isClosing}
+        transparent={true}
+        onRequestClose={handleClose}
+        animationType="none"
+      >
+        <Animated.View 
+          style={[
+            styles.modalOverlay,
+            { opacity: overlayOpacity }
+          ]}
+          onStartShouldSetResponder={() => true}
+          onResponderStart={handleClose}
+        >
+          <Animated.View
+            style={[
+              styles.modalContent,
+              { 
+                backgroundColor: theme.cardBackground,
+                transform: [{ translateY: contentTranslateY }]
+              }
+            ]}
+            onStartShouldSetResponder={() => true}
+            onResponderStart={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <View style={styles.header}>
+              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+                <IconSymbol name="xmark" size={24} color={theme.textColor} />
+              </TouchableOpacity>
+              <ThemedText style={[styles.title, { color: theme.textColor }]}>
+                Выбор группы
+              </ThemedText>
+            </View>
+
+            <View style={[styles.searchContainer, { backgroundColor: theme.background }]}>
+              <IconSymbol name="magnifyingglass" size={20} color={theme.secondaryText} />
+              <TextInput
+                style={[styles.searchInput, { color: theme.textColor }]}
+                placeholder="Поиск группы..."
+                placeholderTextColor={theme.secondaryText}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.accentColor} />
+              </View>
+            ) : error ? (
+              <ThemedText style={[styles.errorText, { color: theme.textColor }]}>
+                {error}
+              </ThemedText>
+            ) : (
+              <ScrollView style={styles.departmentsList}>
+                {filteredDepartments.map((dept, index) => (
+                  <View key={index} style={styles.departmentSection}>
+                    <ThemedText style={[styles.departmentName, { color: theme.secondaryText }]}>
+                      {dept.name}
+                    </ThemedText>
+                    {dept.courses.map((course, courseIndex) => (
+                      <View key={courseIndex} style={styles.courseSection}>
+                        <ThemedText style={[styles.courseName]}>
+                          {course.course} курс
+                        </ThemedText>
+                        <View style={styles.groupsGrid}>
+                          {course.groups.map((group, groupIndex) => (
+                            <TouchableOpacity
+                              key={groupIndex}
+                              style={[
+                                styles.groupButton,
+                                { 
+                                  backgroundColor: theme.background,
+                                  borderColor: theme.borderColor,
+                                  ...(currentGroup === group && {
+                                    borderColor: theme.accentColor,
+                                  })
+                                }
+                              ]}
+                              onPress={() => handleGroupSelect(group)}
+                            >
+                              <View style={styles.groupButtonContent}>
+                                <ThemedText style={{ color: theme.textColor }}>
+                                  {group}
+                                </ThemedText>
+                                {currentGroup === group && (
+                                  <IconSymbol 
+                                    name="checkmark" 
+                                    size={16} 
+                                    color={theme.accentColor}
+                                  />
+                                )}
+                              </View>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ))}
+              </ScrollView>
+            )}
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -191,6 +387,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-start',
+    ...(Platform.OS === 'web' ? {
+      display: 'flex',
+      alignItems: 'center',
+      paddingTop: 50,
+    } : {}),
   },
   modalContent: {
     borderTopLeftRadius: 0,
@@ -202,14 +403,13 @@ const styles = StyleSheet.create({
 
     ...(Platform.OS === 'web' ? {
       maxWidth: 600,
-      alignSelf: 'center',
-      width: '100%',
-      margin: 20,
+      width: '90%',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       borderBottomLeftRadius: 20,
       borderBottomRightRadius: 20,
-      marginTop: 50,
+      position: 'relative',
+      top: 0,
     } : {}),
   },
   header: {

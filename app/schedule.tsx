@@ -179,6 +179,8 @@ export default function ScheduleScreen() {
   const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
@@ -209,8 +211,11 @@ export default function ScheduleScreen() {
 
   const initializeCurrentSchedule = (scheduleData: ScheduleDay[]) => {
     const now = getMskDate();
+    const sortedDays = scheduleData.sort((a, b) => 
+      new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
+    );
 
-    const todaySchedule = scheduleData.find(day => {
+    const todaySchedule = sortedDays.find(day => {
       const scheduleDate = new Date(day.info.date);
       return scheduleDate.toDateString() === now.toDateString();
     });
@@ -220,27 +225,63 @@ export default function ScheduleScreen() {
 
     if (todaySchedule) {
       const weekIndex = weeks.indexOf(todaySchedule.info.weekNumber);
+      const dayIndex = sortedDays.findIndex(day => day.info.date === todaySchedule.info.date);
+      
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(todaySchedule.info.date);
+
+      setTimeout(() => {
+        if (lessonsScrollViewRef.current) {
+          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          lessonsScrollViewRef.current.scrollTo({ 
+            x: dayIndex * weekWidth, 
+            animated: false 
+          });
+        }
+      }, 100);
       return;
     }
 
-    const nextDay = scheduleData.find(day => new Date(day.info.date) > now);
+    const nextDay = sortedDays.find(day => new Date(day.info.date) > now);
     if (nextDay) {
       const weekIndex = weeks.indexOf(nextDay.info.weekNumber);
+      const dayIndex = sortedDays.findIndex(day => day.info.date === nextDay.info.date);
+      
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(nextDay.info.date);
+
+      setTimeout(() => {
+        if (lessonsScrollViewRef.current) {
+          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          lessonsScrollViewRef.current.scrollTo({ 
+            x: dayIndex * weekWidth, 
+            animated: false 
+          });
+        }
+      }, 100);
       return;
     }
 
-    const lastDay = scheduleData[scheduleData.length - 1];
+    const lastDay = sortedDays[sortedDays.length - 1];
     if (lastDay) {
       const weekIndex = weeks.indexOf(lastDay.info.weekNumber);
+      const dayIndex = sortedDays.length - 1;
+      
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(lastDay.info.date);
+
+      setTimeout(() => {
+        if (lessonsScrollViewRef.current) {
+          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          lessonsScrollViewRef.current.scrollTo({ 
+            x: dayIndex * weekWidth, 
+            animated: false 
+          });
+        }
+      }, 100);
     }
   };
 
@@ -397,10 +438,21 @@ export default function ScheduleScreen() {
   }, [currentWeekIndex, loading]);
 
   const handleDaySelect = async (date: string) => {
-    if (Platform.OS !== 'web') {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
     setSelectedDay(date);
+    
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
+    const sortedDays = schedule
+      .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime());
+    
+    const dayIndex = sortedDays.findIndex(day => day.info.date === date);
+    
+    if (lessonsScrollViewRef.current && dayIndex !== -1) {
+      const scrollToOffset = dayIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
+      lessonsScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
+    }
   };
 
   const handleScroll = (event: any) => {
@@ -414,9 +466,7 @@ export default function ScheduleScreen() {
 
     if (currentWeekSchedule?.weekNumber !== currentWeekNumber) {
       setCurrentWeekNumber(currentWeekSchedule?.weekNumber);
-      if (currentWeekSchedule?.days[0]) {
-        setSelectedDay(currentWeekSchedule.days[0].info.date);
-      }
+      setSelectedWeek(nearestWeekIndex);
     }
 
     if (Platform.OS !== 'web' && deltaTime > 0) {
@@ -473,6 +523,60 @@ export default function ScheduleScreen() {
     }
     router.back();
   };
+
+  const renderGroupIcon = () => {
+    if (Platform.OS === 'web') {
+      return (
+        <ThemedText style={{ color: theme.secondaryText, marginLeft: 2, marginTop: 5 }}>▼</ThemedText>
+      );
+    }
+    return (
+      <IconSymbol name="chevron.down" size={12} color={theme.secondaryText} />
+    );
+  };
+
+  const lessonsScrollViewRef = useRef<ScrollView>(null);
+
+  const handleLessonsScroll = (event: any) => {
+    const x = event.nativeEvent.contentOffset.x;
+    const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+    
+    const allDays = schedule.sort((a, b) => 
+      new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
+    );
+    
+    const nearestDayIndex = Math.round(x / weekWidth);
+    const currentDay = allDays[nearestDayIndex];
+    
+    if (currentDay) {
+      const weekIndex = weeks.indexOf(currentDay.info.weekNumber);
+      if (weekIndex !== selectedWeek) {
+        setSelectedWeek(weekIndex);
+        if (weekScrollViewRef.current) {
+          const weekScrollOffset = weekIndex * weekWidth;
+          weekScrollViewRef.current.scrollTo({ x: weekScrollOffset, animated: true });
+        }
+        
+        if (Platform.OS !== 'web') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        }
+      }
+      
+      if (currentDay.info.date !== selectedDay && Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      
+      setSelectedDay(currentDay.info.date);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -658,13 +762,17 @@ export default function ScheduleScreen() {
                 onPress={() => setModalVisible(true)}
                 style={styles.groupButton}
               >
-                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
-                  • {groupName}
+                <ThemedText style={[styles.separator, { color: theme.secondaryText }]}>
+                  •
                 </ThemedText>
-                <IconSymbol name="chevron.down" size={12} color={theme.secondaryText} />
+                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                  {groupName}
+                </ThemedText>
+                {renderGroupIcon()}
               </TouchableOpacity>
             </View>
 
+            {/* TODO: что-то придумать для удобного скрола на виндовс мыше */}
             <ScrollView
               ref={weekScrollViewRef}
               horizontal
@@ -710,6 +818,7 @@ export default function ScheduleScreen() {
                               backgroundColor: isSelected ? theme.accentColor : theme.background,
                               borderColor: theme.borderColor,
                               opacity: isToday ? 1 : 0.8,
+                              ...(Platform.OS === 'web' ? { transition: 'background-color 0.2s ease-in-out' } : {}),
                             }
                           ]}
                           onPress={() => handleDaySelect(day.info.date)}
@@ -743,93 +852,126 @@ export default function ScheduleScreen() {
               ))}
             </ScrollView>
 
-            {selectedDay && schedule
-              .find(day => day.info.date === selectedDay)?.lessons
-              .sort((a, b) => {
-                if (a.timeRange && b.timeRange) {
-                  return a.timeRange.localeCompare(b.timeRange);
-                }
-                return 0;
-              })
-              .map((lesson, lessonIndex) => {
-                const typeInfo = getLessonTypeInfo(lesson.type);
-                return (
-                  <ThemedView
-                    key={lessonIndex}
-                    style={[
-                      styles.lessonCard,
-                      lessonIndex !== schedule.length - 1 && {
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                        borderColor: theme.borderColor
-                      }
-                    ]}
+            <ScrollView
+              ref={lessonsScrollViewRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16}
+              decelerationRate={Platform.OS === 'web' ? 0.1 : 'fast'}
+              snapToAlignment="start"
+              pagingEnabled={Platform.OS === 'web'}
+              onScroll={handleLessonsScroll}
+              scrollEventThrottle={16}
+              contentContainerStyle={Platform.OS === 'web' ? {
+                maxWidth: MAX_WEB_WIDTH,
+                alignSelf: 'center'
+              } : undefined}
+            >
+              {schedule
+                .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime())
+                .map((day) => (
+                  <View 
+                    key={day.info.date}
+                    style={{
+                      width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16,
+                      paddingRight: 16
+                    }}
                   >
-                    <ThemedView style={[styles.lessonTime, { justifyContent: lesson.timeRange ? 'space-between' : 'center' }]}>
-                      {lesson.timeRange ? (
-                        <>
-                          <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-                            {lesson.timeRange.split('-')[0]}
-                          </ThemedText>
-                          <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-                            {lesson.timeRange.split('-')[1]}
-                          </ThemedText>
-                        </>
-                      ) : (
-                        <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
-                          ∞
-                        </ThemedText>
-                      )}
-                    </ThemedView>
+                    {day.lessons
+                      .sort((a, b) => {
+                        if (a.timeRange && b.timeRange) {
+                          return a.timeRange.localeCompare(b.timeRange);
+                        }
+                        return 0;
+                      })
+                      .map((lesson, lessonIndex) => {
+                        const typeInfo = getLessonTypeInfo(lesson.type);
+                        return (
+                          <ThemedView
+                            key={lessonIndex}
+                            style={[
+                              styles.lessonCard,
+                              {
+                                marginBottom: 20,
+                                ...(Platform.OS === 'web' ? {
+                                  marginBottom: 16,
+                                } : {}),
+                              },
+                              lessonIndex !== day.lessons.length - 1 && {
+                                borderBottomWidth: StyleSheet.hairlineWidth,
+                                borderColor: theme.borderColor
+                              }
+                            ]}
+                          >
+                            <ThemedView style={[styles.lessonTime, { justifyContent: lesson.timeRange ? 'space-between' : 'center' }]}>
+                              {lesson.timeRange ? (
+                                <>
+                                  <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                                    {lesson.timeRange.split('-')[0]}
+                                  </ThemedText>
+                                  <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                                    {lesson.timeRange.split('-')[1]}
+                                  </ThemedText>
+                                </>
+                              ) : (
+                                <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
+                                  ∞
+                                </ThemedText>
+                              )}
+                            </ThemedView>
 
-                    <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
+                            <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
 
-                    <ThemedView style={styles.lessonInfo}>
-                      <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
-                        {lesson.lessonName}
-                      </ThemedText>
+                            <ThemedView style={styles.lessonInfo}>
+                              <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                                {lesson.lessonName}
+                              </ThemedText>
 
-                      <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
-                        {typeInfo.label && (
-                          <ThemedText style={[styles.lessonType, { color: typeInfo.color }]}>
-                            {typeInfo.label}
-                          </ThemedText>
-                        )}
-                      </ThemedText>
+                              <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                                {typeInfo.label && (
+                                  <ThemedText style={[styles.lessonType, { color: typeInfo.color }]}>
+                                    {typeInfo.label}
+                                  </ThemedText>
+                                )}
+                              </ThemedText>
 
-                      <ThemedView style={styles.lessonDetails}>
-                        {lesson.auditoryName && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              {lesson.auditoryName}
-                            </ThemedText>
+                              <ThemedView style={styles.lessonDetails}>
+                                {lesson.auditoryName && (
+                                  <ThemedView style={styles.detailItem}>
+                                    <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
+                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                      {lesson.auditoryName}
+                                    </ThemedText>
+                                  </ThemedView>
+                                )}
+                              </ThemedView>
+                              <ThemedView style={styles.lessonDetails}>
+                                {lesson.teacherName && (
+                                  <ThemedView style={styles.detailItem}>
+                                    <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
+                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                      {lesson.teacherName}
+                                    </ThemedText>
+                                  </ThemedView>
+                                )}
+                              </ThemedView>
+                              <ThemedView style={styles.lessonDetails}>
+                                {lesson.isDistant && (
+                                  <ThemedView style={styles.detailItem}>
+                                    <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
+                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                      Дистанционно
+                                    </ThemedText>
+                                  </ThemedView>
+                                )}
+                              </ThemedView>
+                            </ThemedView>
                           </ThemedView>
-                        )}
-                      </ThemedView>
-                      <ThemedView style={styles.lessonDetails}>
-                        {lesson.teacherName && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              {lesson.teacherName}
-                            </ThemedText>
-                          </ThemedView>
-                        )}
-                      </ThemedView>
-                      <ThemedView style={styles.lessonDetails}>
-                        {lesson.isDistant && (
-                          <ThemedView style={styles.detailItem}>
-                            <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
-                            <ThemedText style={{ color: theme.secondaryText }}>
-                              Дистанционно
-                            </ThemedText>
-                          </ThemedView>
-                        )}
-                      </ThemedView>
-                    </ThemedView>
-                  </ThemedView>
-                );
-              })}
+                        );
+                      })}
+                  </View>
+                ))}
+            </ScrollView>
           </ScrollView>
         </SafeAreaView>
       </Container>
@@ -888,6 +1030,15 @@ const styles = StyleSheet.create({
   groupText: {
     marginTop: -2,
     fontSize: 15,
+    ...Platform.select({
+      web: {
+        marginTop: 5,
+      },
+    }),
+  },
+  separator: {
+    marginLeft: -4,
+    marginRight: 4,
   },
   weekSelector: {
     flexGrow: 0,
