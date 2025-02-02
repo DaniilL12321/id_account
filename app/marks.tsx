@@ -8,9 +8,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
-import Animated, { 
-  useAnimatedStyle, 
-  withRepeat, 
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
   withSequence,
   withTiming,
   useSharedValue,
@@ -229,7 +229,7 @@ function MarksContent() {
     .sort((a, b) => {
       if (a.markName === null && b.markName !== null) return -1;
       if (a.markName !== null && b.markName === null) return 1;
-      
+
       return b.mark - a.mark;
     });
   const averageGrade = calculateAverageGrade(marks);

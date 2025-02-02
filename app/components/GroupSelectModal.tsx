@@ -46,7 +46,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
-  
+
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(-100)).current;
 
@@ -107,7 +107,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
     const courseGroups = dept.groups.reduce((acc: { [key: number]: string[] }, group: string) => {
       const courseMatch = group.match(/-(\d)/);
       const course = courseMatch ? parseInt(courseMatch[1]) : 0;
-      
+
       if (!acc[course]) {
         acc[course] = [];
       }
@@ -118,12 +118,12 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
     const courses = Object.entries(courseGroups).map(([course, groups]) => ({
       course: parseInt(course),
       groups: [...new Set(groups)]
-        .filter(group => 
+        .filter(group =>
           group.toLowerCase().includes(searchQuery.toLowerCase())
         )
         .sort((a, b) => a.localeCompare(b))
     })).filter(course => course.course > 0)
-    .sort((a, b) => a.course - b.course);
+      .sort((a, b) => a.course - b.course);
 
     return {
       name: dept.name,
@@ -183,7 +183,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
         onRequestClose={handleClose}
         animationType="none"
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.modalOverlay,
             { opacity: overlayOpacity }
@@ -194,7 +194,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
           <Animated.View
             style={[
               styles.modalContent,
-              { 
+              {
                 backgroundColor: theme.cardBackground,
                 transform: [{ translateY: contentTranslateY }]
               }
@@ -250,7 +250,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                               key={groupIndex}
                               style={[
                                 styles.groupButton,
-                                { 
+                                {
                                   backgroundColor: theme.background,
                                   borderColor: theme.borderColor,
                                   ...(currentGroup === group && {
@@ -265,9 +265,9 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                                   {group}
                                 </ThemedText>
                                 {currentGroup === group && (
-                                  <IconSymbol 
-                                    name="checkmark" 
-                                    size={16} 
+                                  <IconSymbol
+                                    name="checkmark"
+                                    size={16}
                                     color={theme.accentColor}
                                   />
                                 )}
@@ -342,7 +342,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                             key={groupIndex}
                             style={[
                               styles.groupButton,
-                              { 
+                              {
                                 backgroundColor: theme.background,
                                 borderColor: theme.borderColor,
                                 ...(currentGroup === group && {
@@ -360,9 +360,9 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                                 {group}
                               </ThemedText>
                               {currentGroup === group && (
-                                <IconSymbol 
-                                  name="checkmark" 
-                                  size={16} 
+                                <IconSymbol
+                                  name="checkmark"
+                                  size={16}
                                   color={theme.accentColor}
                                 />
                               )}

@@ -24,7 +24,7 @@ export default function TabLayout() {
           tabBarStyle: Platform.select({
             ios: {
               position: 'absolute',
-              backgroundColor: themeMode === 'system' 
+              backgroundColor: themeMode === 'system'
                 ? (isDarkMode ? '#000000' : '#FFFFFF')
                 : themeMode === 'dark' ? '#000000' : '#FFFFFF',
               borderTopWidth: 0,
@@ -41,7 +41,7 @@ export default function TabLayout() {
               height: 60,
               paddingTop: 8,
               paddingBottom: 8,
-              backgroundColor: themeMode === 'system' 
+              backgroundColor: themeMode === 'system'
                 ? (isDarkMode ? '#000000' : '#FFFFFF')
                 : themeMode === 'dark' ? '#000000' : '#FFFFFF',
               borderTopWidth: 0,
@@ -50,7 +50,7 @@ export default function TabLayout() {
               zIndex: 1000,
             },
             default: {
-              backgroundColor: themeMode === 'system' 
+              backgroundColor: themeMode === 'system'
                 ? (isDarkMode ? '#000000' : '#FFFFFF')
                 : themeMode === 'dark' ? '#000000' : '#FFFFFF',
               borderTopWidth: 0,

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  ScrollView, 
-  TouchableOpacity, 
-  View, 
-  Platform, 
-  StyleSheet, 
-  type ViewStyle 
+import {
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Platform,
+  StyleSheet,
+  type ViewStyle
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';

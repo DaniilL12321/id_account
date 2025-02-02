@@ -211,7 +211,7 @@ export default function ScheduleScreen() {
 
   const initializeCurrentSchedule = (scheduleData: ScheduleDay[]) => {
     const now = getMskDate();
-    const sortedDays = scheduleData.sort((a, b) => 
+    const sortedDays = scheduleData.sort((a, b) =>
       new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
     );
 
@@ -226,7 +226,7 @@ export default function ScheduleScreen() {
     if (todaySchedule) {
       const weekIndex = weeks.indexOf(todaySchedule.info.weekNumber);
       const dayIndex = sortedDays.findIndex(day => day.info.date === todaySchedule.info.date);
-      
+
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(todaySchedule.info.date);
@@ -234,9 +234,9 @@ export default function ScheduleScreen() {
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
           const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
-          lessonsScrollViewRef.current.scrollTo({ 
-            x: dayIndex * weekWidth, 
-            animated: false 
+          lessonsScrollViewRef.current.scrollTo({
+            x: dayIndex * weekWidth,
+            animated: false
           });
         }
       }, 100);
@@ -247,7 +247,7 @@ export default function ScheduleScreen() {
     if (nextDay) {
       const weekIndex = weeks.indexOf(nextDay.info.weekNumber);
       const dayIndex = sortedDays.findIndex(day => day.info.date === nextDay.info.date);
-      
+
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(nextDay.info.date);
@@ -255,9 +255,9 @@ export default function ScheduleScreen() {
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
           const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
-          lessonsScrollViewRef.current.scrollTo({ 
-            x: dayIndex * weekWidth, 
-            animated: false 
+          lessonsScrollViewRef.current.scrollTo({
+            x: dayIndex * weekWidth,
+            animated: false
           });
         }
       }, 100);
@@ -268,7 +268,7 @@ export default function ScheduleScreen() {
     if (lastDay) {
       const weekIndex = weeks.indexOf(lastDay.info.weekNumber);
       const dayIndex = sortedDays.length - 1;
-      
+
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
       setSelectedDay(lastDay.info.date);
@@ -276,9 +276,9 @@ export default function ScheduleScreen() {
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
           const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
-          lessonsScrollViewRef.current.scrollTo({ 
-            x: dayIndex * weekWidth, 
-            animated: false 
+          lessonsScrollViewRef.current.scrollTo({
+            x: dayIndex * weekWidth,
+            animated: false
           });
         }
       }, 100);
@@ -439,16 +439,16 @@ export default function ScheduleScreen() {
 
   const handleDaySelect = async (date: string) => {
     setSelectedDay(date);
-    
+
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    
+
     const sortedDays = schedule
       .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime());
-    
+
     const dayIndex = sortedDays.findIndex(day => day.info.date === date);
-    
+
     if (lessonsScrollViewRef.current && dayIndex !== -1) {
       const scrollToOffset = dayIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
       lessonsScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
@@ -540,14 +540,14 @@ export default function ScheduleScreen() {
   const handleLessonsScroll = (event: any) => {
     const x = event.nativeEvent.contentOffset.x;
     const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
-    
-    const allDays = schedule.sort((a, b) => 
+
+    const allDays = schedule.sort((a, b) =>
       new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
     );
-    
+
     const nearestDayIndex = Math.round(x / weekWidth);
     const currentDay = allDays[nearestDayIndex];
-    
+
     if (currentDay) {
       const weekIndex = weeks.indexOf(currentDay.info.weekNumber);
       if (weekIndex !== selectedWeek) {
@@ -556,16 +556,16 @@ export default function ScheduleScreen() {
           const weekScrollOffset = weekIndex * weekWidth;
           weekScrollViewRef.current.scrollTo({ x: weekScrollOffset, animated: true });
         }
-        
+
         if (Platform.OS !== 'web') {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         }
       }
-      
+
       if (currentDay.info.date !== selectedDay && Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      
+
       setSelectedDay(currentDay.info.date);
     }
   };
@@ -875,7 +875,7 @@ export default function ScheduleScreen() {
               {schedule
                 .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime())
                 .map((day) => (
-                  <View 
+                  <View
                     key={day.info.date}
                     style={{
                       width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16,

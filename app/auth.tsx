@@ -62,7 +62,7 @@ function AuthContent() {
 
       if (!response.ok) {
         let errorMessage = 'Произошла ошибка при входе';
-        
+
         if (response.status === 401 || response.status === 400) {
           errorMessage = 'Неверный логин или пароль';
         } else if (data.message) {
@@ -92,9 +92,9 @@ function AuthContent() {
         alertContainer.style.width = 'auto';
         alertContainer.style.textAlign = 'center';
         alertContainer.innerText = errorMessage;
-        
+
         document.body.appendChild(alertContainer);
-        
+
         setTimeout(() => {
           alertContainer.style.opacity = '0';
           alertContainer.style.transition = 'opacity 0.3s ease';

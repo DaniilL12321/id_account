@@ -29,14 +29,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('themeMode', mode);
   };
 
-  const isDarkMode = themeMode === 'system' 
-    ? systemColorScheme === 'dark' 
+  const isDarkMode = themeMode === 'system'
+    ? systemColorScheme === 'dark'
     : themeMode === 'dark';
 
   return (
-    <ThemeContext.Provider 
-      value={{ 
-        themeMode, 
+    <ThemeContext.Provider
+      value={{
+        themeMode,
         setThemeMode: handleThemeChange,
         isDarkMode,
       }}

@@ -10,9 +10,9 @@ import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
 import { MaterialIcons } from '@expo/vector-icons';
-import Animated, { 
-  useAnimatedStyle, 
-  withRepeat, 
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
   withSequence,
   withTiming,
   useSharedValue,
@@ -155,7 +155,7 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
         <SkeletonLoader style={{ width: 150, height: 28, borderRadius: 8 }} />
         <SkeletonLoader style={{ width: 110, height: 32, borderRadius: 16 }} />
       </ThemedView>
-      
+
       <SkeletonLoader style={{ width: 200, height: 16, borderRadius: 8 }} />
 
       <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
@@ -596,7 +596,7 @@ export default function HomeScreen() {
               <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
                 Успеваемость
               </ThemedText>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={async () => {
                   if (Platform.OS !== 'web') {
                     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -813,7 +813,7 @@ export default function HomeScreen() {
             </ThemedView>
 
             <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.actionButton, { opacity: 0.5 }]}
                 onPress={async () => {
                   if (Platform.OS !== 'web') {
@@ -829,7 +829,7 @@ export default function HomeScreen() {
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.actionButton]}
                 onPress={async () => {
                   await handleQuickAction('schedule');

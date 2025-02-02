@@ -174,7 +174,7 @@ function SettingsContent() {
   return (
     <Container>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <ScrollView 
+        <ScrollView
           style={[styles.scrollView, { backgroundColor: theme.background }]}
           contentContainerStyle={[
             styles.scrollContent,
@@ -189,7 +189,7 @@ function SettingsContent() {
           </View>
 
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.settingsItem}
               onPress={() => setShowThemeModal(true)}
             >
@@ -204,7 +204,7 @@ function SettingsContent() {
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-                disabled={true}>
+              disabled={true}>
               <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
               <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
                 Расширенный режим
@@ -213,7 +213,7 @@ function SettingsContent() {
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-                disabled={true}>
+              disabled={true}>
               <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
               <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
                 Уведомления
@@ -224,7 +224,7 @@ function SettingsContent() {
 
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
             <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-                disabled={true}>
+              disabled={true}>
               <IconSymbol name="globe" size={20} color={theme.accentColor} />
               <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
                 Язык
@@ -235,7 +235,7 @@ function SettingsContent() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.settingsItem}
               onPress={showModal}
             >
@@ -247,7 +247,7 @@ function SettingsContent() {
             </TouchableOpacity>
           </ThemedView>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}
             onPress={handleLogout}
           >
@@ -264,14 +264,14 @@ function SettingsContent() {
         animationType="fade"
         onRequestClose={() => setShowThemeModal(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
-          activeOpacity={1} 
+          activeOpacity={1}
           onPress={() => setShowThemeModal(false)}
         >
           <View style={[
-            styles.modalContent, 
-            { 
+            styles.modalContent,
+            {
               backgroundColor: theme.cardBackground,
               ...(Platform.OS === 'web' ? {
                 maxWidth: 400,
@@ -292,7 +292,7 @@ function SettingsContent() {
         animationType="none"
         onRequestClose={hideModal}
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.modalContainer,
             Platform.OS === 'web' ? {
@@ -302,34 +302,34 @@ function SettingsContent() {
             } : {}
           ]}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalContainerTouchable}
             activeOpacity={1}
             onPress={hideModal}
           >
-            <Animated.View 
+            <Animated.View
               style={[
                 styles.infoModalContent,
-                { 
+                {
                   backgroundColor: theme.cardBackground,
-                  transform: Platform.OS === 'web' 
+                  transform: Platform.OS === 'web'
                     ? [{
-                        scale: fadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.95, 1],
-                        }),
-                      }]
+                      scale: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }),
+                    }]
                     : [
-                        {
-                          translateY: Animated.add(
-                            fadeAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [300, 0],
-                            }),
-                            panY
-                          ),
-                        },
-                      ],
+                      {
+                        translateY: Animated.add(
+                          fadeAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [300, 0],
+                          }),
+                          panY
+                        ),
+                      },
+                    ],
                   ...(Platform.OS === 'web' ? {
                     position: 'relative',
                     maxWidth: 600,
@@ -359,7 +359,7 @@ function SettingsContent() {
                   <ThemedText style={{ color: theme.secondaryText }}>Название</ThemedText>
                   <ThemedText style={{ color: theme.textColor }}>ЯГТУ ID</ThemedText>
                 </View>
-                
+
                 <View style={styles.infoRow}>
                   <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
                   <ThemedText style={{ color: theme.textColor }}>минус 0.0.5</ThemedText>
@@ -395,7 +395,7 @@ function SettingsContent() {
         animationType="none"
         onRequestClose={hideLogoutModal}
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.modalContainer,
             Platform.OS === 'web' ? {
@@ -405,23 +405,23 @@ function SettingsContent() {
             } : {}
           ]}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.modalContainerTouchable}
             activeOpacity={1}
             onPress={hideLogoutModal}
           >
-            <Animated.View 
+            <Animated.View
               style={[
                 styles.logoutModalContent,
-                { 
+                {
                   backgroundColor: theme.cardBackground,
-                  transform: Platform.OS === 'web' 
+                  transform: Platform.OS === 'web'
                     ? [{
-                        scale: logoutFadeAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.95, 1],
-                        }),
-                      }]
+                      scale: logoutFadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }),
+                    }]
                     : []
                 }
               ]}
@@ -433,7 +433,7 @@ function SettingsContent() {
                   Выход
                 </ThemedText>
               </View>
-              
+
               <View style={styles.logoutModalBody}>
                 <ThemedText style={[styles.logoutModalText, { color: theme.textColor }]}>
                   Вы уверены, что хотите выйти?
@@ -441,7 +441,7 @@ function SettingsContent() {
               </View>
 
               <View style={styles.logoutModalActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.logoutModalButton, { backgroundColor: theme.cardBackground }]}
                   onPress={hideLogoutModal}
                 >
@@ -449,7 +449,7 @@ function SettingsContent() {
                     Отмена
                   </ThemedText>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.logoutModalButton, styles.logoutModalButtonDanger]}
                   onPress={() => {
                     hideLogoutModal();

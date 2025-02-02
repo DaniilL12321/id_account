@@ -105,7 +105,7 @@ export default function RestoreScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <Container>
         <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
           >

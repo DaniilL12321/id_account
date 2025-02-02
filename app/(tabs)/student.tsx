@@ -9,9 +9,9 @@ import { CheckResponse, UserDetailsResponse } from '@/types/api';
 import Constants from 'expo-constants';
 import { useTheme } from '@/app/context/theme';
 import { Container } from '@/components/ui/Container';
-import Animated, { 
-  useAnimatedStyle, 
-  withRepeat, 
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
   withSequence,
   withTiming,
   useSharedValue,
@@ -89,7 +89,7 @@ const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
 
 const StudentProfileSkeleton = ({ theme }: { theme: ThemeConfig }) => {
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.scrollView}
       contentContainerStyle={[
         styles.scrollContent,
@@ -248,7 +248,7 @@ export default function StudentProfileScreen() {
   return (
     <Container>
       <SafeAreaView style={styles.container}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
@@ -277,7 +277,7 @@ export default function StudentProfileScreen() {
           </ThemedView>
 
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sectionItem}
               onPress={handleInfoPress}
             >
@@ -288,7 +288,7 @@ export default function StudentProfileScreen() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.sectionItem}
               onPress={handleMarksPress}
             >
@@ -299,8 +299,8 @@ export default function StudentProfileScreen() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.sectionItem, { opacity: 0.5 }]} 
+            <TouchableOpacity
+              style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
             >
@@ -316,8 +316,8 @@ export default function StudentProfileScreen() {
             <ThemedText style={[styles.sectionTitle, { color: theme.textColor }]}>
               Документы
             </ThemedText>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
@@ -332,7 +332,7 @@ export default function StudentProfileScreen() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
@@ -344,7 +344,7 @@ export default function StudentProfileScreen() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
@@ -358,7 +358,7 @@ export default function StudentProfileScreen() {
           </ThemedView>
 
           <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
@@ -370,7 +370,7 @@ export default function StudentProfileScreen() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
@@ -391,7 +391,7 @@ export default function StudentProfileScreen() {
           onRequestClose={() => setIsImageModalVisible(false)}
         >
           <BlurView intensity={100} style={styles.modalContainer}>
-            <Pressable 
+            <Pressable
               style={styles.modalContent}
               onPress={async () => {
                 if (Platform.OS !== 'web') {
@@ -405,10 +405,10 @@ export default function StudentProfileScreen() {
                 style={styles.modalImage}
                 resizeMode="contain"
               />
-              <IconSymbol 
-                name="xmark.circle.fill" 
-                size={32} 
-                color="white" 
+              <IconSymbol
+                name="xmark.circle.fill"
+                size={32}
+                color="white"
                 style={styles.closeButton}
               />
             </Pressable>
