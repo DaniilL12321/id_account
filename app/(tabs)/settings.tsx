@@ -362,7 +362,7 @@ function SettingsContent() {
                 
                 <View style={styles.infoRow}>
                   <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
-                  <ThemedText style={{ color: theme.textColor }}>1.0.0</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>минус 0.0.5</ThemedText>
                 </View>
 
                 <View style={styles.infoRow}>
