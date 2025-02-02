@@ -655,6 +655,11 @@ export default function ScheduleScreen() {
                     {
                       marginTop: 8,
                       height: 130,
+                      ...(Platform.OS === 'web' ? {
+                        width: '95%',
+                        marginLeft: 16,
+                        marginRight: 16,
+                      } : {})
                     }
                   ]}
                 >
@@ -747,7 +752,7 @@ export default function ScheduleScreen() {
             style={[styles.scrollView, { backgroundColor: theme.background }]}
             contentContainerStyle={[
               styles.scrollContent,
-              { padding: 16, gap: 16, paddingBottom: 80 }
+              { padding: 16, gap: 16, paddingBottom: 200 }
             ]}
             showsVerticalScrollIndicator={false}
           >
@@ -874,7 +879,12 @@ export default function ScheduleScreen() {
                     key={day.info.date}
                     style={{
                       width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16,
-                      paddingRight: 16
+                      paddingRight: 16,
+                      ...(Platform.OS === 'web' ? {
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                        maxWidth: MAX_WEB_WIDTH - 32,
+                      } : {}),
                     }}
                   >
                     {day.lessons
@@ -1045,7 +1055,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   weekContainer: {
-    width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 32 : Dimensions.get('window').width - 32,
+    width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 64 : Dimensions.get('window').width - 32,
     borderRadius: 16,
     padding: 16,
     marginRight: 16,
@@ -1060,6 +1070,7 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
       web: {
+        marginLeft: 16,
         maxWidth: MAX_WEB_WIDTH - 32,
         alignSelf: 'center',
       },
