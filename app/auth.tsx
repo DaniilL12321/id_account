@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, Image, Alert, TextInput, KeyboardAvoidingView, Platform, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
@@ -20,9 +20,10 @@ export default function AuthScreen() {
 }
 
 function AuthContent() {
+  const params = useLocalSearchParams<{ login?: string; password?: string }>();
   const { isDarkMode } = useTheme();
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
+  const [login, setLogin] = useState(params.login || '');
+  const [password, setPassword] = useState(params.password || '');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<TextInput>(null);
@@ -108,6 +109,12 @@ function AuthContent() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (params.login && params.password) {
+      handleLogin();
+    }
+  }, []);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -211,20 +218,13 @@ function AuthContent() {
             </ThemedText>
           </View>
 
-          {/* TODO: тут мб потом сделать получение по зачетке логина и пароля */}
-
-          {/* <View style={styles.actions}>
-            <TouchableOpacity>
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={() => router.push('/restore')}>
               <ThemedText style={[styles.link, { color: theme.accentColor }]}>
-                Забыли пароль?
+                Получить учетные данные
               </ThemedText>
             </TouchableOpacity>
-            <TouchableOpacity>
-              <ThemedText style={[styles.link, { color: theme.accentColor }]}>
-                Регистрация
-              </ThemedText>
-            </TouchableOpacity>
-          </View> */}
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
