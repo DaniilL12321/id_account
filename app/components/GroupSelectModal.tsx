@@ -47,8 +47,8 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
   const [error, setError] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
-  const contentTranslateY = useRef(new Animated.Value(-100)).current;
+  const overlayOpacity = new Animated.Value(0);
+  const contentTranslateY = new Animated.Value(-100);
 
   useEffect(() => {
     if (visible) {
