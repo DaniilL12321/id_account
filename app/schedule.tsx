@@ -73,11 +73,16 @@ const webStyles = {
   paddingBottom: 80,
 } as unknown as ViewStyle;
 
-const MAX_WEB_WIDTH = 767;
+const getContainerWidth = () => {
+  if (Platform.OS === 'web') {
+    return Math.min(767, Dimensions.get('window').width);
+  }
+  return Dimensions.get('window').width;
+};
 
 const getMskDate = () => {
   const now = new Date();
-  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const utc = now.getTime();
   return new Date(utc);
 };
 
@@ -178,6 +183,12 @@ export default function ScheduleScreen() {
   const lastScrollTime = useRef(Date.now());
   const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
   const [modalVisible, setModalVisible] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(() => {
+    if (Platform.OS === 'web') {
+      return Math.min(767, Dimensions.get('window').width);
+    }
+    return Dimensions.get('window').width;
+  });
 
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -233,7 +244,7 @@ export default function ScheduleScreen() {
 
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
-          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
             animated: false
@@ -254,7 +265,7 @@ export default function ScheduleScreen() {
 
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
-          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
             animated: false
@@ -275,7 +286,7 @@ export default function ScheduleScreen() {
 
       setTimeout(() => {
         if (lessonsScrollViewRef.current) {
-          const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+          const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
             animated: false
@@ -423,7 +434,7 @@ export default function ScheduleScreen() {
 
   useEffect(() => {
     if (weekScrollViewRef.current && !loading) {
-      const scrollToOffset = currentWeekIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
+      const scrollToOffset = currentWeekIndex * (getContainerWidth() - 16);
 
       if (Platform.OS === 'web') {
         weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: true });
@@ -435,7 +446,7 @@ export default function ScheduleScreen() {
         }, 100);
       }
     }
-  }, [currentWeekIndex, loading]);
+  }, [currentWeekIndex, loading, containerWidth]);
 
   const handleDaySelect = async (date: string) => {
     setSelectedDay(date);
@@ -450,7 +461,7 @@ export default function ScheduleScreen() {
     const dayIndex = sortedDays.findIndex(day => day.info.date === date);
 
     if (lessonsScrollViewRef.current && dayIndex !== -1) {
-      const scrollToOffset = dayIndex * (Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16);
+      const scrollToOffset = dayIndex * (getContainerWidth() - 16);
       lessonsScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
     }
   };
@@ -460,7 +471,7 @@ export default function ScheduleScreen() {
     const currentTime = Date.now();
     const deltaTime = currentTime - lastScrollTime.current;
 
-    const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+    const weekWidth = getContainerWidth() - 16;
     const nearestWeekIndex = Math.round(currentX / weekWidth);
     const currentWeekSchedule = groupScheduleByWeeks(schedule)[nearestWeekIndex];
 
@@ -490,7 +501,7 @@ export default function ScheduleScreen() {
     const x = event.nativeEvent.contentOffset.x;
 
     if (Platform.OS === 'web') {
-      const weekWidth = MAX_WEB_WIDTH - 16;
+      const weekWidth = getContainerWidth() - 16;
       const nearestWeekIndex = Math.round(x / weekWidth);
       const targetX = nearestWeekIndex * weekWidth;
 
@@ -539,7 +550,7 @@ export default function ScheduleScreen() {
 
   const handleLessonsScroll = (event: any) => {
     const x = event.nativeEvent.contentOffset.x;
-    const weekWidth = Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16;
+    const weekWidth = getContainerWidth() - 16;
 
     const allDays = schedule.sort((a, b) =>
       new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
@@ -577,6 +588,39 @@ export default function ScheduleScreen() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const handleResize = () => {
+        setContainerWidth(Math.min(767, Dimensions.get('window').width));
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  const getWeekContainerStyle = () => ({
+    ...styles.weekContainer,
+    width: Platform.OS === 'web' ? containerWidth - 64 : Dimensions.get('window').width - 32,
+    ...(Platform.OS === 'web' && {
+      maxWidth: containerWidth - 32,
+    }),
+  });
+
+  const getDayButtonStyle = () => ({
+    ...styles.dayButton,
+    minWidth: Platform.OS === 'web'
+      ? (containerWidth - 32 - 32 - 40) / 7
+      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+  });
+
+  const getSkeletonDayStyle = () => ({
+    ...styles.skeletonDay,
+    minWidth: Platform.OS === 'web'
+      ? (containerWidth + 32 + 32 + 40) / 7
+      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+  });
 
   if (loading) {
     return (
@@ -636,7 +680,7 @@ export default function ScheduleScreen() {
                     <Animated.View
                       key={index}
                       style={[
-                        styles.skeletonDay,
+                        getSkeletonDayStyle(),
                         {
                           backgroundColor: isDarkMode ? '#333333' : '#DEDEDE',
                           opacity: fadeAnim,
@@ -777,13 +821,12 @@ export default function ScheduleScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* TODO: что-то придумать для удобного скрола на виндовс мыше */}
             <ScrollView
               ref={weekScrollViewRef}
               horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.weekSelector}
-              snapToInterval={Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16}
+              snapToInterval={getContainerWidth() - 16}
               decelerationRate={Platform.OS === 'web' ? 0.1 : 'fast'}
               snapToAlignment="start"
               pagingEnabled={Platform.OS === 'web'}
@@ -792,7 +835,7 @@ export default function ScheduleScreen() {
               scrollEventThrottle={16}
               contentContainerStyle={Platform.OS === 'web' ? {
                 marginTop: 14,
-                maxWidth: MAX_WEB_WIDTH,
+                maxWidth: getContainerWidth(),
                 alignSelf: 'center'
               } : undefined}
             >
@@ -800,7 +843,7 @@ export default function ScheduleScreen() {
                 <ThemedView
                   key={week.weekNumber}
                   style={[
-                    styles.weekContainer,
+                    getWeekContainerStyle(),
                     { backgroundColor: theme.cardBackground }
                   ]}
                 >
@@ -818,7 +861,7 @@ export default function ScheduleScreen() {
                         <TouchableOpacity
                           key={day.info.date}
                           style={[
-                            styles.dayButton,
+                            getDayButtonStyle(),
                             {
                               backgroundColor: isSelected ? theme.accentColor : theme.background,
                               borderColor: theme.borderColor,
@@ -861,14 +904,14 @@ export default function ScheduleScreen() {
               ref={lessonsScrollViewRef}
               horizontal
               showsHorizontalScrollIndicator={false}
-              snapToInterval={Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16}
+              snapToInterval={getContainerWidth() - 16}
               decelerationRate={Platform.OS === 'web' ? 0.1 : 'fast'}
               snapToAlignment="start"
               pagingEnabled={Platform.OS === 'web'}
               onScroll={handleLessonsScroll}
               scrollEventThrottle={16}
               contentContainerStyle={Platform.OS === 'web' ? {
-                maxWidth: MAX_WEB_WIDTH,
+                maxWidth: getContainerWidth(),
                 alignSelf: 'center'
               } : undefined}
             >
@@ -878,12 +921,12 @@ export default function ScheduleScreen() {
                   <View
                     key={day.info.date}
                     style={{
-                      width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 16 : Dimensions.get('window').width - 16,
+                      width: Platform.OS === 'web' ? getContainerWidth() - 16 : Dimensions.get('window').width - 16,
                       paddingRight: 16,
                       ...(Platform.OS === 'web' ? {
                         paddingLeft: 16,
                         paddingRight: 16,
-                        maxWidth: MAX_WEB_WIDTH - 32,
+                        maxWidth: getContainerWidth() - 32,
                       } : {}),
                     }}
                   >
@@ -1055,7 +1098,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   weekContainer: {
-    width: Platform.OS === 'web' ? MAX_WEB_WIDTH - 64 : Dimensions.get('window').width - 32,
     borderRadius: 16,
     padding: 16,
     marginRight: 16,
@@ -1071,7 +1113,6 @@ const styles = StyleSheet.create({
       },
       web: {
         marginLeft: 16,
-        maxWidth: MAX_WEB_WIDTH - 32,
         alignSelf: 'center',
       },
     }),
@@ -1101,9 +1142,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     flex: 1,
-    minWidth: Platform.OS === 'web'
-      ? (MAX_WEB_WIDTH - 32 - 32 - 40) / 7
-      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
   },
   dayNumber: {
     fontSize: 17,
@@ -1203,9 +1241,6 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 12,
     flex: 1,
-    minWidth: Platform.OS === 'web'
-      ? (MAX_WEB_WIDTH - 32 - 32 - 40) / 7
-      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
   },
   groupButton: {
     flexDirection: 'row',
