@@ -924,9 +924,9 @@ export default function ScheduleScreen() {
                       width: Platform.OS === 'web' ? getContainerWidth() - 16 : Dimensions.get('window').width - 16,
                       paddingRight: 16,
                       ...(Platform.OS === 'web' ? {
-                        paddingLeft: 16,
+                        paddingLeft: 32,
                         paddingRight: 16,
-                        maxWidth: getContainerWidth() - 32,
+                        maxWidth: getContainerWidth() - 16,
                       } : {}),
                     }}
                   >
