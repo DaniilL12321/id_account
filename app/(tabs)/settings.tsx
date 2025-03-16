@@ -37,7 +37,7 @@ function SettingsContent() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [logoutFadeAnim] = useState(new Animated.Value(0));
   const buildDate = new Date();
-  const buildNumber = Math.floor((Date.now() - buildDate.getTime()) / (1000 * 60 * 60 * 24));
+  const buildNumber = 1;
   const [modalVisible, setModalVisible] = useState(false);
   const panY = useRef(new Animated.Value(0)).current;
   const resetPositionAnim = Animated.timing(panY, {
