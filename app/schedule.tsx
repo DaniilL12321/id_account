@@ -394,7 +394,7 @@ export default function ScheduleScreen() {
       case 256:
         return { label: 'Экзамен', color: '#2688EB' };
       case 4096:
-        return { label: 'ВУЦ', color: '#FF3B30' };
+        return { label: 'не указано', color: '#FF3B30' };
       default:
         return { label: '', color: '#8E8E93' };
     }
