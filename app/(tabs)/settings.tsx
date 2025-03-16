@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder, ViewStyle, Platform } from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder, ViewStyle, Platform, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -171,6 +171,9 @@ function SettingsContent() {
     </TouchableOpacity>
   );
 
+  const downloadUrl = 'https://github.com/DaniilL12321/id_account/releases';
+  const webAppUrl = 'https://ystu.expo.app/';
+
   return (
     <Container>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -246,6 +249,34 @@ function SettingsContent() {
               <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
             </TouchableOpacity>
           </ThemedView>
+
+          {Platform.OS === 'web' ? (
+            <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+              <TouchableOpacity
+                style={styles.settingsItem}
+                onPress={() => Linking.openURL(downloadUrl)}
+              >
+                <IconSymbol name="arrow.down.circle" size={20} color={theme.accentColor} />
+                <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                  Скачать приложение
+                </ThemedText>
+                <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              </TouchableOpacity>
+            </ThemedView>
+          ) : (
+            <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+              <TouchableOpacity
+                style={styles.settingsItem}
+                onPress={() => Linking.openURL(webAppUrl)}
+              >
+                <IconSymbol name="globe" size={20} color={theme.accentColor} />
+                <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                  Открыть веб-версию
+                </ThemedText>
+                <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              </TouchableOpacity>
+            </ThemedView>
+          )}
 
           <TouchableOpacity
             style={[styles.logoutButton, { backgroundColor: '#FF3B30' }]}

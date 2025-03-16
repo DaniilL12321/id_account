@@ -45,6 +45,8 @@ const iconMap: Record<string, keyof typeof Ionicons['glyphMap']> = {
   'photo.fill': 'images',
   'qrcode': 'qr-code',
   'gear': 'settings-outline',
+  'arrow.down.circle.fill': 'arrow-down-circle',
+  'arrow.down.circle': 'arrow-down-circle-outline',
 };
 
 export type IconSymbolName = keyof typeof iconMap;
