@@ -10,14 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ru.ystuty.id"
+      "bundleIdentifier": "ru.ystu.id"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "ru.ystuty.id"
+      "package": "ru.ystu.id"
     },
     "web": {
       "bundler": "metro",
@@ -48,9 +48,12 @@
       }
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/2c23029f-1ccc-4c9a-aaa8-3ef8c7c83d32"
     },
     "assetBundlePatterns": [

@@ -16,14 +16,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'ru.ystuty.id'
+    bundleIdentifier: 'ru.ystu.id'
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff'
     },
-    package: 'ru.ystuty.id'
+    package: 'ru.ystu.id'
   },
   extra: {
     OAUTH_URL: process.env.OAUTH_URL,
