@@ -501,14 +501,6 @@ export default function HomeScreen() {
     return "Сегодня, " + date.toLocaleDateString('ru-RU', options);
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
   const handleDaySelect = async (day: DayOffset) => {
     if (Platform.OS !== 'web') {
       await Haptics.selectionAsync();
@@ -576,16 +568,6 @@ export default function HomeScreen() {
             <ThemedText style={[styles.pageTitle, { color: theme.textColor }]}>
               Привет, {userInfo?.firstName}
             </ThemedText>
-            <ThemedView style={[styles.timeCard, { backgroundColor: theme.cardBackground }]}>
-              {Platform.OS === 'ios' ? (
-                <IconSymbol name="clock.fill" size={16} color={theme.accentColor} />
-              ) : (
-                <MaterialIcons name="access-time" size={16} color={theme.accentColor} />
-              )}
-              <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
-                {formatTime(currentTime)}
-              </ThemedText>
-            </ThemedView>
           </ThemedView>
           <ThemedText style={[styles.dateText, { color: theme.secondaryText }]}>
             {formatDate(currentTime)}
@@ -888,38 +870,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContainer: {
-    marginTop: -20,
+    marginTop: -10,
     backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: -30,
+    marginBottom: -15,
   },
   pageTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  timeCard: {
-    marginTop: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    gap: 6,
-    minWidth: 110,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
   },
   timeText: {
     fontSize: 13,
