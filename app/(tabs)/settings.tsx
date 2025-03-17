@@ -36,8 +36,8 @@ function SettingsContent() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [logoutFadeAnim] = useState(new Animated.Value(0));
-  const buildDate = new Date();
-  const buildNumber = 1;
+  const buildDate = new Date("2025-03-17"); // TODO: надо бы нормально конечно сделать, но пока так 😂
+  const buildNumber = 4; // TODO: тут бы тоже 🙃
   const [modalVisible, setModalVisible] = useState(false);
   const panY = useRef(new Animated.Value(0)).current;
   const resetPositionAnim = Animated.timing(panY, {
@@ -393,7 +393,7 @@ function SettingsContent() {
 
                 <View style={styles.infoRow}>
                   <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
-                  <ThemedText style={{ color: theme.textColor }}>минус 0.0.5</ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>0.0.1</ThemedText>
                 </View>
 
                 <View style={styles.infoRow}>
