@@ -8,6 +8,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Container } from '@/components/ui/Container';
 import { useTheme } from '@/app/context/theme';
+import Constants from 'expo-constants';
+
+const { OAUTH_URL } = Constants.expoConfig?.extra || {};
 
 const webStyles = {
   minHeight: '100vh',
@@ -149,6 +152,21 @@ function SettingsContent() {
 
   const performLogout = async () => {
     try {
+      const tokens = await AsyncStorage.getItem('auth_tokens');
+      if (!tokens) {
+        router.replace('/auth');
+        return;
+      }
+      const { access_token } = JSON.parse(tokens);
+
+      const response = await fetch(`${OAUTH_URL}/logout`, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`
+        }
+      });
+
+      await response.json();
+
       await AsyncStorage.removeItem('auth_tokens');
       router.replace('/auth');
     } catch (error) {

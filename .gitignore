@@ -40,3 +40,5 @@ yarn-error.*
 
 app-example
 expo.app.config.ts
+
+.vscode
