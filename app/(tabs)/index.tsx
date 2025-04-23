@@ -20,7 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-const { API_URL, OAUTH_URL } = Constants.expoConfig?.extra || {};
+const { API_URL, OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } = Constants.expoConfig?.extra || {};
 
 interface AuthInfo {
   auth: number;
@@ -311,6 +311,31 @@ export default function HomeScreen() {
     red: '#FF3B30',
   };
 
+  const isTokenExpired = (token: string) => {
+    const { issued_at, expires_in } = JSON.parse(token);
+    const now = Date.now();
+    return now - issued_at > expires_in * 1000;
+  };
+
+  const refreshToken = async () => {
+    const tokens = await AsyncStorage.getItem('auth_tokens');
+    if (!tokens) {
+      router.replace('/auth');
+      return;
+    }
+
+    const { refresh_token } = JSON.parse(tokens);
+
+    const response = await fetch(`${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=refresh_token&refresh_token=${refresh_token}`, {
+      method: 'POST',
+    });
+
+    const data = await response.json();
+    await AsyncStorage.setItem('auth_tokens', JSON.stringify({ ...data, issued_at: Date.now() }));
+
+    return data;
+  };
+
   const fetchUserInfo = async (accessToken: string) => {
     try {
       const response = await fetch(`${OAUTH_URL}/check`, {
@@ -464,13 +489,22 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const init = async () => {
-      const tokens = await AsyncStorage.getItem('auth_tokens');
+      let tokens = await AsyncStorage.getItem('auth_tokens');
       if (!tokens) {
         router.replace('/auth');
         return;
       }
 
-      const { access_token } = JSON.parse(tokens);
+      if (isTokenExpired(tokens)) {
+        const data = await refreshToken();
+        await AsyncStorage.setItem(
+          'auth_tokens',
+          JSON.stringify({ ...data, issued_at: Date.now() }),
+        );
+        tokens = await AsyncStorage.getItem('auth_tokens');
+      }
+
+      const { access_token } = JSON.parse(tokens as string);
       const groupName = await fetchUserInfo(access_token);
       if (groupName) {
         await Promise.all([

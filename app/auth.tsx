@@ -72,7 +72,7 @@ function AuthContent() {
         throw new Error(errorMessage);
       }
 
-      await AsyncStorage.setItem('auth_tokens', JSON.stringify(data));
+      await AsyncStorage.setItem('auth_tokens', JSON.stringify({ ...data, issued_at: Date.now() }));
       router.replace('/');
     } catch (error) {
       if (Platform.OS === 'web') {
