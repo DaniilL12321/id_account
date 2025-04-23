@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Platform, ScrollView, Image, TouchableOpacity, ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  Platform,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -16,11 +23,12 @@ import Animated, {
   withSequence,
   withTiming,
   useSharedValue,
-  withDelay
+  withDelay,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-const { API_URL, OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } = Constants.expoConfig?.extra || {};
+const { API_URL, OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } =
+  Constants.expoConfig?.extra || {};
 
 interface AuthInfo {
   auth: number;
@@ -115,14 +123,11 @@ const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
   React.useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withDelay(
-          Math.random() * 500,
-          withTiming(0.7, { duration: 1000 })
-        ),
-        withTiming(0.3, { duration: 1000 })
+        withDelay(Math.random() * 500, withTiming(0.7, { duration: 1000 })),
+        withTiming(0.3, { duration: 1000 }),
       ),
       -1,
-      true
+      true,
     );
   }, []);
 
@@ -147,7 +152,7 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
       style={styles.scrollView}
       contentContainerStyle={[
         styles.scrollContent,
-        { padding: 16, gap: 16, paddingBottom: 80 }
+        { padding: 16, gap: 16, paddingBottom: 80 },
       ]}
       showsVerticalScrollIndicator={false}
     >
@@ -158,34 +163,65 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
 
       <SkeletonLoader style={{ width: 200, height: 16, borderRadius: 8 }} />
 
-      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      >
         <ThemedView style={styles.cardHeader}>
           <SkeletonLoader style={{ width: 120, height: 24, borderRadius: 8 }} />
           <SkeletonLoader style={{ width: 80, height: 20, borderRadius: 8 }} />
         </ThemedView>
 
         <ThemedView style={styles.statsGrid}>
-          <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
-            <SkeletonLoader style={{ width: 24, height: 24, borderRadius: 12 }} />
-            <SkeletonLoader style={{ width: 40, height: 28, borderRadius: 8 }} />
-            <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+          <ThemedView
+            style={[
+              styles.statCard,
+              styles.statCardWide,
+              { backgroundColor: theme.background },
+            ]}
+          >
+            <SkeletonLoader
+              style={{ width: 24, height: 24, borderRadius: 12 }}
+            />
+            <SkeletonLoader
+              style={{ width: 40, height: 28, borderRadius: 8 }}
+            />
+            <SkeletonLoader
+              style={{ width: 80, height: 16, borderRadius: 8 }}
+            />
           </ThemedView>
 
           {[1, 2].map((i) => (
-            <ThemedView key={i} style={[styles.statCard, { backgroundColor: theme.background }]}>
-              <SkeletonLoader style={{ width: 24, height: 24, borderRadius: 12 }} />
-              <SkeletonLoader style={{ width: 30, height: 28, borderRadius: 8 }} />
-              <SkeletonLoader style={{ width: 60, height: 16, borderRadius: 8 }} />
+            <ThemedView
+              key={i}
+              style={[styles.statCard, { backgroundColor: theme.background }]}
+            >
+              <SkeletonLoader
+                style={{ width: 24, height: 24, borderRadius: 12 }}
+              />
+              <SkeletonLoader
+                style={{ width: 30, height: 28, borderRadius: 8 }}
+              />
+              <SkeletonLoader
+                style={{ width: 60, height: 16, borderRadius: 8 }}
+              />
             </ThemedView>
           ))}
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      >
         <ThemedView style={styles.cardHeader}>
-          <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <SkeletonLoader style={{ width: 100, height: 24, borderRadius: 8 }} />
-            <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+          <ThemedView
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+          >
+            <SkeletonLoader
+              style={{ width: 100, height: 24, borderRadius: 8 }}
+            />
+            <SkeletonLoader
+              style={{ width: 80, height: 16, borderRadius: 8 }}
+            />
           </ThemedView>
           <SkeletonLoader style={{ width: 100, height: 20, borderRadius: 8 }} />
         </ThemedView>
@@ -199,7 +235,7 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
                   flex: 1,
                   height: 36,
                   borderRadius: 10,
-                  marginHorizontal: 2
+                  marginHorizontal: 2,
                 }}
               />
             ))}
@@ -213,17 +249,29 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
               style={[styles.scheduleItem, { borderColor: theme.borderColor }]}
             >
               <ThemedView style={styles.scheduleTime}>
-                <SkeletonLoader style={{ width: 40, height: 16, borderRadius: 8 }} />
-                <SkeletonLoader style={{ width: 40, height: 16, borderRadius: 8 }} />
+                <SkeletonLoader
+                  style={{ width: 40, height: 16, borderRadius: 8 }}
+                />
+                <SkeletonLoader
+                  style={{ width: 40, height: 16, borderRadius: 8 }}
+                />
               </ThemedView>
 
-              <SkeletonLoader style={{ width: 3, height: '100%', borderRadius: 1.5 }} />
+              <SkeletonLoader
+                style={{ width: 3, height: '100%', borderRadius: 1.5 }}
+              />
 
               <ThemedView style={styles.scheduleInfo}>
-                <SkeletonLoader style={{ width: '80%', height: 20, borderRadius: 8 }} />
+                <SkeletonLoader
+                  style={{ width: '80%', height: 20, borderRadius: 8 }}
+                />
                 <ThemedView style={styles.lessonDetails}>
-                  <SkeletonLoader style={{ width: 120, height: 16, borderRadius: 8 }} />
-                  <SkeletonLoader style={{ width: 100, height: 16, borderRadius: 8 }} />
+                  <SkeletonLoader
+                    style={{ width: 120, height: 16, borderRadius: 8 }}
+                  />
+                  <SkeletonLoader
+                    style={{ width: 100, height: 16, borderRadius: 8 }}
+                  />
                 </ThemedView>
               </ThemedView>
             </ThemedView>
@@ -231,7 +279,9 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      >
         <ThemedView style={styles.cardHeader}>
           <SkeletonLoader style={{ width: 140, height: 24, borderRadius: 8 }} />
         </ThemedView>
@@ -239,8 +289,12 @@ const HomeScreenSkeleton = ({ theme }: { theme: any }) => {
         <ThemedView style={[styles.actionGrid, { paddingTop: 0 }]}>
           {[1, 2, 3, 4].map((i) => (
             <ThemedView key={i} style={styles.actionButton}>
-              <SkeletonLoader style={{ width: 48, height: 48, borderRadius: 12 }} />
-              <SkeletonLoader style={{ width: 80, height: 16, borderRadius: 8 }} />
+              <SkeletonLoader
+                style={{ width: 48, height: 48, borderRadius: 12 }}
+              />
+              <SkeletonLoader
+                style={{ width: 80, height: 16, borderRadius: 8 }}
+              />
             </ThemedView>
           ))}
         </ThemedView>
@@ -279,7 +333,10 @@ const setCachedSchedule = async (data: Record<DayOffset, Lesson[]>) => {
       timestamp: Date.now(),
       data,
     };
-    await AsyncStorage.setItem('home_schedule_cache', JSON.stringify(cacheData));
+    await AsyncStorage.setItem(
+      'home_schedule_cache',
+      JSON.stringify(cacheData),
+    );
   } catch (error) {
     console.error('Error setting cache:', error);
   }
@@ -289,12 +346,14 @@ export default function HomeScreen() {
   const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<AuthInfo['user'] | null>(null);
-  const [schedule, setSchedule] = useState<Record<DayOffset, Lesson[]>>({} as Record<DayOffset, Lesson[]>);
+  const [schedule, setSchedule] = useState<Record<DayOffset, Lesson[]>>(
+    {} as Record<DayOffset, Lesson[]>,
+  );
   const [selectedDay, setSelectedDay] = useState<DayOffset>(0);
   const [stats, setStats] = useState({
     averageGrade: 0,
     completedCount: 0,
-    debtsCount: 0
+    debtsCount: 0,
   });
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -302,9 +361,13 @@ export default function HomeScreen() {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-    segmentBackground: isDarkMode ? '#2C2C2E' : Platform.select({ ios: '#F2F3F7', android: '#E8E8E8' }),
+    segmentBackground: isDarkMode
+      ? '#2C2C2E'
+      : Platform.select({ ios: '#F2F3F7', android: '#E8E8E8' }),
     accentColor: '#2688EB',
     green: '#34C759',
     yellow: '#FFCC00',
@@ -326,12 +389,18 @@ export default function HomeScreen() {
 
     const { refresh_token } = JSON.parse(tokens);
 
-    const response = await fetch(`${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=refresh_token&refresh_token=${refresh_token}`, {
-      method: 'POST',
-    });
+    const response = await fetch(
+      `${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=refresh_token&refresh_token=${refresh_token}`,
+      {
+        method: 'POST',
+      },
+    );
 
     const data = await response.json();
-    await AsyncStorage.setItem('auth_tokens', JSON.stringify({ ...data, issued_at: Date.now() }));
+    await AsyncStorage.setItem(
+      'auth_tokens',
+      JSON.stringify({ ...data, issued_at: Date.now() }),
+    );
 
     return data;
   };
@@ -340,8 +409,8 @@ export default function HomeScreen() {
     try {
       const response = await fetch(`${OAUTH_URL}/check`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       const data = await response.json();
       if (data.auth_info?.auth === 1) {
@@ -363,11 +432,18 @@ export default function HomeScreen() {
         return;
       }
 
-      const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
+      const response = await fetch(
+        `${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(
+          groupName,
+        )}`,
+      );
       const data: ScheduleResponse = await response.json();
 
-      const days = data.items.flatMap(item => item.days);
-      const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<DayOffset, Lesson[]>;
+      const days = data.items.flatMap((item) => item.days);
+      const newSchedule: Record<DayOffset, Lesson[]> = {} as Record<
+        DayOffset,
+        Lesson[]
+      >;
 
       const now = new Date();
       now.setHours(now.getHours());
@@ -389,9 +465,10 @@ export default function HomeScreen() {
 
           const scheduleYear = scheduleDate.getFullYear();
           const scheduleMonth = scheduleDate.getMonth() + 1;
-          const isCurrentAcademicYear = scheduleMonth >= 9 ?
-            scheduleYear === academicYear :
-            scheduleYear === academicYear + 1;
+          const isCurrentAcademicYear =
+            scheduleMonth >= 9
+              ? scheduleYear === academicYear
+              : scheduleYear === academicYear + 1;
 
           if (isCurrentAcademicYear) {
             const isSameMonthAndDay =
@@ -407,7 +484,13 @@ export default function HomeScreen() {
         });
 
         if (daySchedule) {
-          console.log('Found schedule for:', targetDateStr, 'with', daySchedule.lessons.length, 'lessons');
+          console.log(
+            'Found schedule for:',
+            targetDateStr,
+            'with',
+            daySchedule.lessons.length,
+            'lessons',
+          );
         }
 
         newSchedule[offset as DayOffset] = (daySchedule?.lessons || []).sort(
@@ -420,7 +503,7 @@ export default function HomeScreen() {
             if (!a.timeRange && b.timeRange) return 1;
             if (a.timeRange && !b.timeRange) return -1;
             return a.lessonName.localeCompare(b.lessonName);
-          }
+          },
         );
       });
 
@@ -437,8 +520,8 @@ export default function HomeScreen() {
     try {
       const response = await fetch(`${API_URL}/s/general/v1/mark/my`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       const data: Mark[] = await response.json();
 
@@ -460,7 +543,9 @@ export default function HomeScreen() {
         return acc;
       }, {} as Record<number, Mark[]>);
 
-      const lastSemester = Math.max(...Object.keys(marksBySemester).map(Number));
+      const lastSemester = Math.max(
+        ...Object.keys(marksBySemester).map(Number),
+      );
 
       data.forEach((mark) => {
         if (mark.mark > 0) {
@@ -480,7 +565,7 @@ export default function HomeScreen() {
       setStats({
         averageGrade: gradesCount > 0 ? totalGrade / gradesCount : 0,
         completedCount,
-        debtsCount
+        debtsCount,
       });
     } catch (error) {
       console.error('Error fetching marks:', error);
@@ -507,10 +592,7 @@ export default function HomeScreen() {
       const { access_token } = JSON.parse(tokens as string);
       const groupName = await fetchUserInfo(access_token);
       if (groupName) {
-        await Promise.all([
-          fetchSchedule(groupName),
-          fetchMarks(access_token)
-        ]);
+        await Promise.all([fetchSchedule(groupName), fetchMarks(access_token)]);
       }
       setLoading(false);
     };
@@ -530,9 +612,9 @@ export default function HomeScreen() {
     const options: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'long',
-      weekday: 'long'
+      weekday: 'long',
     };
-    return "Сегодня, " + date.toLocaleDateString('ru-RU', options);
+    return 'Сегодня, ' + date.toLocaleDateString('ru-RU', options);
   };
 
   const handleDaySelect = async (day: DayOffset) => {
@@ -556,7 +638,9 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <Container>
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: theme.background }]}
+        >
           <HomeScreenSkeleton theme={theme} />
         </SafeAreaView>
       </Container>
@@ -594,7 +678,7 @@ export default function HomeScreen() {
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { padding: 16, gap: 16, paddingBottom: 80 }
+            { padding: 16, gap: 16, paddingBottom: 80 },
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -607,18 +691,25 @@ export default function HomeScreen() {
             {formatDate(currentTime)}
           </ThemedText>
 
-          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.card, { backgroundColor: theme.cardBackground }]}
+          >
             <ThemedView style={styles.cardHeader}>
-              <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.cardTitle, { color: theme.textColor }]}
+              >
                 Успеваемость
               </ThemedText>
               <TouchableOpacity
                 onPress={async () => {
                   if (Platform.OS !== 'web') {
-                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await Haptics.impactAsync(
+                      Haptics.ImpactFeedbackStyle.Medium,
+                    );
                   }
                   router.push('/marks');
-                }}>
+                }}
+              >
                 <ThemedText style={{ color: theme.accentColor }}>
                   Подробнее
                 </ThemedText>
@@ -626,9 +717,17 @@ export default function HomeScreen() {
             </ThemedView>
 
             <ThemedView style={styles.statsGrid}>
-              <ThemedView style={[styles.statCard, styles.statCardWide, { backgroundColor: theme.background }]}>
+              <ThemedView
+                style={[
+                  styles.statCard,
+                  styles.statCardWide,
+                  { backgroundColor: theme.background },
+                ]}
+              >
                 <IconSymbol name="star.fill" size={24} color={theme.yellow} />
-                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.statValue, { color: theme.textColor }]}
+                >
                   {stats.averageGrade.toFixed(1)}
                 </ThemedText>
                 <ThemedText
@@ -641,9 +740,17 @@ export default function HomeScreen() {
                 </ThemedText>
               </ThemedView>
 
-              <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-                <IconSymbol name="checkmark.circle.fill" size={24} color={theme.green} />
-                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+              <ThemedView
+                style={[styles.statCard, { backgroundColor: theme.background }]}
+              >
+                <IconSymbol
+                  name="checkmark.circle.fill"
+                  size={24}
+                  color={theme.green}
+                />
+                <ThemedText
+                  style={[styles.statValue, { color: theme.textColor }]}
+                >
                   {stats.completedCount}
                 </ThemedText>
                 <ThemedText
@@ -656,9 +763,17 @@ export default function HomeScreen() {
                 </ThemedText>
               </ThemedView>
 
-              <ThemedView style={[styles.statCard, { backgroundColor: theme.background }]}>
-                <IconSymbol name="exclamationmark.circle.fill" size={24} color={theme.red} />
-                <ThemedText style={[styles.statValue, { color: theme.textColor }]}>
+              <ThemedView
+                style={[styles.statCard, { backgroundColor: theme.background }]}
+              >
+                <IconSymbol
+                  name="exclamationmark.circle.fill"
+                  size={24}
+                  color={theme.red}
+                />
+                <ThemedText
+                  style={[styles.statValue, { color: theme.textColor }]}
+                >
                   {stats.debtsCount}
                 </ThemedText>
                 <ThemedText
@@ -673,23 +788,35 @@ export default function HomeScreen() {
             </ThemedView>
           </ThemedView>
 
-          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.card, { backgroundColor: theme.cardBackground }]}
+          >
             <ThemedView style={styles.cardHeader}>
-              <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+              <ThemedView
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+              >
+                <ThemedText
+                  style={[styles.cardTitle, { color: theme.textColor }]}
+                >
                   Расписание
                 </ThemedText>
-                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                <ThemedText
+                  style={[styles.groupText, { color: theme.secondaryText }]}
+                >
                   •
                 </ThemedText>
-                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                <ThemedText
+                  style={[styles.groupText, { color: theme.secondaryText }]}
+                >
                   {userInfo?.groupName}
                 </ThemedText>
               </ThemedView>
               <TouchableOpacity
                 onPress={async () => {
                   if (Platform.OS !== 'web') {
-                    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    await Haptics.impactAsync(
+                      Haptics.ImpactFeedbackStyle.Light,
+                    );
                   }
                   router.push('/schedule');
                 }}
@@ -707,12 +834,18 @@ export default function HomeScreen() {
                     key={key}
                     style={[
                       styles.segment,
-                      { backgroundColor: selectedDay === Number(key) ? theme.accentColor : theme.background },
+                      {
+                        backgroundColor:
+                          selectedDay === Number(key)
+                            ? theme.accentColor
+                            : theme.background,
+                      },
                       Platform.select({
                         ios: {
                           shadowColor: '#000',
                           shadowOffset: { width: 0, height: 2 },
-                          shadowOpacity: selectedDay === Number(key) ? 0.1 : 0.05,
+                          shadowOpacity:
+                            selectedDay === Number(key) ? 0.1 : 0.05,
                           shadowRadius: 4,
                         },
                         android: {
@@ -725,7 +858,12 @@ export default function HomeScreen() {
                     <ThemedText
                       style={[
                         styles.dayNumber,
-                        { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
+                        {
+                          color:
+                            selectedDay === Number(key)
+                              ? '#FFFFFF'
+                              : theme.secondaryText,
+                        },
                       ]}
                     >
                       {getDayNumber(Number(key))}
@@ -733,7 +871,12 @@ export default function HomeScreen() {
                     <ThemedText
                       style={[
                         styles.segmentText,
-                        { color: selectedDay === Number(key) ? '#FFFFFF' : theme.secondaryText }
+                        {
+                          color:
+                            selectedDay === Number(key)
+                              ? '#FFFFFF'
+                              : theme.secondaryText,
+                        },
                       ]}
                       numberOfLines={1}
                       adjustsFontSizeToFit
@@ -748,7 +891,13 @@ export default function HomeScreen() {
 
             <ThemedView style={styles.scheduleList}>
               {currentSchedule.length === 0 ? (
-                <ThemedText style={{ color: theme.secondaryText, textAlign: 'center', padding: 16 }}>
+                <ThemedText
+                  style={{
+                    color: theme.secondaryText,
+                    textAlign: 'center',
+                    padding: 16,
+                  }}
+                >
                   {`${DAY_LABELS[selectedDay]} пар нет`}
                 </ThemedText>
               ) : (
@@ -757,32 +906,65 @@ export default function HomeScreen() {
                   return (
                     <ThemedView
                       key={index}
-                      style={[styles.scheduleItem, { borderColor: theme.borderColor }]}
+                      style={[
+                        styles.scheduleItem,
+                        { borderColor: theme.borderColor },
+                      ]}
                     >
                       <ThemedView style={styles.scheduleTime}>
                         {lesson.timeRange ? (
                           <>
-                            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                            <ThemedText
+                              style={[
+                                styles.timeText,
+                                { color: theme.secondaryText },
+                              ]}
+                            >
                               {lesson.timeRange.split('-')[0]}
                             </ThemedText>
-                            <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                            <ThemedText
+                              style={[
+                                styles.timeText,
+                                { color: theme.secondaryText },
+                              ]}
+                            >
                               {lesson.timeRange.split('-')[1]}
                             </ThemedText>
                           </>
                         ) : (
-                          <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
+                          <ThemedText
+                            style={[
+                              styles.infinitySymbol,
+                              { color: typeInfo.color },
+                            ]}
+                          >
                             ∞
                           </ThemedText>
                         )}
                       </ThemedView>
 
-                      <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
+                      <ThemedView
+                        style={[
+                          styles.lessonTypeLine,
+                          { backgroundColor: typeInfo.color },
+                        ]}
+                      />
 
                       <ThemedView style={styles.scheduleInfo}>
-                        <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                        <ThemedText
+                          style={[
+                            styles.lessonName,
+                            { color: theme.textColor },
+                          ]}
+                        >
                           {lesson.lessonName}
                           {!lesson.timeRange && (
-                            <ThemedText style={[styles.examLabel, { color: typeInfo.color }]}>
+                            <ThemedText
+                              style={[
+                                styles.examLabel,
+                                { color: typeInfo.color },
+                              ]}
+                            >
                               {' • ' + typeInfo.label}
                             </ThemedText>
                           )}
@@ -790,24 +972,42 @@ export default function HomeScreen() {
                         <ThemedView style={styles.lessonDetails}>
                           {lesson.auditoryName && (
                             <ThemedView style={styles.detailItem}>
-                              <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
-                              <ThemedText style={{ color: theme.secondaryText }}>
+                              <IconSymbol
+                                name="mappin.circle.fill"
+                                size={14}
+                                color={theme.secondaryText}
+                              />
+                              <ThemedText
+                                style={{ color: theme.secondaryText }}
+                              >
                                 {lesson.auditoryName}
                               </ThemedText>
                             </ThemedView>
                           )}
                           {lesson.teacherName && (
                             <ThemedView style={styles.detailItem}>
-                              <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
-                              <ThemedText style={{ color: theme.secondaryText }}>
+                              <IconSymbol
+                                name="person.fill"
+                                size={14}
+                                color={theme.secondaryText}
+                              />
+                              <ThemedText
+                                style={{ color: theme.secondaryText }}
+                              >
                                 {lesson.teacherName}
                               </ThemedText>
                             </ThemedView>
                           )}
                           {lesson.isDistant && (
                             <ThemedView style={styles.detailItem}>
-                              <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
-                              <ThemedText style={{ color: theme.secondaryText }}>
+                              <IconSymbol
+                                name="video.fill"
+                                size={14}
+                                color={theme.secondaryText}
+                              />
+                              <ThemedText
+                                style={{ color: theme.secondaryText }}
+                              >
                                 Дистанционно
                               </ThemedText>
                             </ThemedView>
@@ -821,9 +1021,13 @@ export default function HomeScreen() {
             </ThemedView>
           </ThemedView>
 
-          <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.card, { backgroundColor: theme.cardBackground }]}
+          >
             <ThemedView style={styles.cardHeader}>
-              <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.cardTitle, { color: theme.textColor }]}
+              >
                 Быстрые действия
               </ThemedText>
             </ThemedView>
@@ -833,14 +1037,28 @@ export default function HomeScreen() {
                 style={[styles.actionButton, { opacity: 0.5 }]}
                 onPress={async () => {
                   if (Platform.OS !== 'web') {
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                    await Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Warning,
+                    );
                   }
                 }}
-                disabled={true}>
-                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                  <IconSymbol name="doc.fill" size={24} color={theme.accentColor} />
+                disabled={true}
+              >
+                <ThemedView
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: theme.background },
+                  ]}
+                >
+                  <IconSymbol
+                    name="doc.fill"
+                    size={24}
+                    color={theme.accentColor}
+                  />
                 </ThemedView>
-                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.actionText, { color: theme.textColor }]}
+                >
                   Справка
                 </ThemedText>
               </TouchableOpacity>
@@ -849,31 +1067,69 @@ export default function HomeScreen() {
                 style={[styles.actionButton]}
                 onPress={async () => {
                   await handleQuickAction('schedule');
-                }}>
-                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                  <IconSymbol name="calendar" size={24} color={theme.accentColor} />
+                }}
+              >
+                <ThemedView
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: theme.background },
+                  ]}
+                >
+                  <IconSymbol
+                    name="calendar"
+                    size={24}
+                    color={theme.accentColor}
+                  />
                 </ThemedView>
-                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.actionText, { color: theme.textColor }]}
+                >
                   Расписание
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-                disabled={true}>
-                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                  <IconSymbol name="person.2.fill" size={24} color={theme.accentColor} />
+              <TouchableOpacity
+                style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}
+              >
+                <ThemedView
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: theme.background },
+                  ]}
+                >
+                  <IconSymbol
+                    name="person.2.fill"
+                    size={24}
+                    color={theme.accentColor}
+                  />
                 </ThemedView>
-                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.actionText, { color: theme.textColor }]}
+                >
                   Преподаватели
                 </ThemedText>
               </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.actionButton, { opacity: 0.5 }]}
-                disabled={true}>
-                <ThemedView style={[styles.actionIcon, { backgroundColor: theme.background }]}>
-                  <IconSymbol name="books.vertical.fill" size={24} color={theme.accentColor} />
+              <TouchableOpacity
+                style={[styles.actionButton, { opacity: 0.5 }]}
+                disabled={true}
+              >
+                <ThemedView
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: theme.background },
+                  ]}
+                >
+                  <IconSymbol
+                    name="books.vertical.fill"
+                    size={24}
+                    color={theme.accentColor}
+                  />
                 </ThemedView>
-                <ThemedText style={[styles.actionText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.actionText, { color: theme.textColor }]}
+                >
                   Библиотека
                 </ThemedText>
               </TouchableOpacity>

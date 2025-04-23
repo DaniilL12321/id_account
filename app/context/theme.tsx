@@ -29,9 +29,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('themeMode', mode);
   };
 
-  const isDarkMode = themeMode === 'system'
-    ? systemColorScheme === 'dark'
-    : themeMode === 'dark';
+  const isDarkMode =
+    themeMode === 'system'
+      ? systemColorScheme === 'dark'
+      : themeMode === 'dark';
 
   return (
     <ThemeContext.Provider
@@ -52,4 +53,4 @@ export function useTheme() {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-} 
+}

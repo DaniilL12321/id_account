@@ -8,7 +8,7 @@ import {
   TextInput,
   Platform,
   ActivityIndicator,
-  Animated
+  Animated,
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -40,7 +40,13 @@ interface GroupSelectModalProps {
   currentGroup?: string;
 }
 
-export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGroup }: GroupSelectModalProps) {
+export function GroupSelectModal({
+  visible,
+  onClose,
+  onSelect,
+  theme,
+  currentGroup,
+}: GroupSelectModalProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,7 +97,9 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch(`${API_URL}/s/schedule/v1/schedule/actual_groups`);
+      const response = await fetch(
+        `${API_URL}/s/schedule/v1/schedule/actual_groups`,
+      );
       const data = await response.json();
       setDepartments(data.items);
       setError(null);
@@ -103,33 +111,40 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
     }
   };
 
-  const filteredDepartments = departments.map((dept: Department) => {
-    const courseGroups = dept.groups.reduce((acc: { [key: number]: string[] }, group: string) => {
-      const courseMatch = group.match(/-(\d)/);
-      const course = courseMatch ? parseInt(courseMatch[1]) : 0;
+  const filteredDepartments = departments
+    .map((dept: Department) => {
+      const courseGroups = dept.groups.reduce(
+        (acc: { [key: number]: string[] }, group: string) => {
+          const courseMatch = group.match(/-(\d)/);
+          const course = courseMatch ? parseInt(courseMatch[1]) : 0;
 
-      if (!acc[course]) {
-        acc[course] = [];
-      }
-      acc[course].push(group);
-      return acc;
-    }, {});
+          if (!acc[course]) {
+            acc[course] = [];
+          }
+          acc[course].push(group);
+          return acc;
+        },
+        {},
+      );
 
-    const courses = Object.entries(courseGroups).map(([course, groups]) => ({
-      course: parseInt(course),
-      groups: [...new Set(groups)]
-        .filter(group =>
-          group.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .sort((a, b) => a.localeCompare(b))
-    })).filter(course => course.course > 0)
-      .sort((a, b) => a.course - b.course);
+      const courses = Object.entries(courseGroups)
+        .map(([course, groups]) => ({
+          course: parseInt(course),
+          groups: [...new Set(groups)]
+            .filter((group) =>
+              group.toLowerCase().includes(searchQuery.toLowerCase()),
+            )
+            .sort((a, b) => a.localeCompare(b)),
+        }))
+        .filter((course) => course.course > 0)
+        .sort((a, b) => a.course - b.course);
 
-    return {
-      name: dept.name,
-      courses
-    };
-  }).filter(dept => dept.courses.some(course => course.groups.length > 0));
+      return {
+        name: dept.name,
+        courses,
+      };
+    })
+    .filter((dept) => dept.courses.some((course) => course.groups.length > 0));
 
   const handleClose = () => {
     if (Platform.OS === 'web') {
@@ -184,10 +199,7 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
         animationType="none"
       >
         <Animated.View
-          style={[
-            styles.modalOverlay,
-            { opacity: overlayOpacity }
-          ]}
+          style={[styles.modalOverlay, { opacity: overlayOpacity }]}
           onStartShouldSetResponder={() => true}
           onResponderStart={handleClose}
         >
@@ -196,8 +208,8 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
               styles.modalContent,
               {
                 backgroundColor: theme.cardBackground,
-                transform: [{ translateY: contentTranslateY }]
-              }
+                transform: [{ translateY: contentTranslateY }],
+              },
             ]}
             onStartShouldSetResponder={() => true}
             onResponderStart={(e) => {
@@ -205,7 +217,10 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
             }}
           >
             <View style={styles.header}>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={handleClose}
+                style={styles.closeButton}
+              >
                 <IconSymbol name="xmark" size={24} color={theme.textColor} />
               </TouchableOpacity>
               <ThemedText style={[styles.title, { color: theme.textColor }]}>
@@ -213,8 +228,17 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
               </ThemedText>
             </View>
 
-            <View style={[styles.searchContainer, { backgroundColor: theme.background }]}>
-              <IconSymbol name="magnifyingglass" size={20} color={theme.secondaryText} />
+            <View
+              style={[
+                styles.searchContainer,
+                { backgroundColor: theme.background },
+              ]}
+            >
+              <IconSymbol
+                name="magnifyingglass"
+                size={20}
+                color={theme.secondaryText}
+              />
               <TextInput
                 style={[styles.searchInput, { color: theme.textColor }]}
                 placeholder="Поиск группы..."
@@ -229,14 +253,21 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                 <ActivityIndicator size="large" color={theme.accentColor} />
               </View>
             ) : error ? (
-              <ThemedText style={[styles.errorText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.errorText, { color: theme.textColor }]}
+              >
                 {error}
               </ThemedText>
             ) : (
               <ScrollView style={styles.departmentsList}>
                 {filteredDepartments.map((dept, index) => (
                   <View key={index} style={styles.departmentSection}>
-                    <ThemedText style={[styles.departmentName, { color: theme.secondaryText }]}>
+                    <ThemedText
+                      style={[
+                        styles.departmentName,
+                        { color: theme.secondaryText },
+                      ]}
+                    >
                       {dept.name}
                     </ThemedText>
                     {dept.courses.map((course, courseIndex) => (
@@ -255,8 +286,8 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                                   borderColor: theme.borderColor,
                                   ...(currentGroup === group && {
                                     borderColor: theme.accentColor,
-                                  })
-                                }
+                                  }),
+                                },
                               ]}
                               onPress={() => handleGroupSelect(group)}
                             >
@@ -295,7 +326,12 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <ThemedView style={[styles.modalContent, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView
+          style={[
+            styles.modalContent,
+            { backgroundColor: theme.cardBackground },
+          ]}
+        >
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <IconSymbol name="xmark" size={24} color={theme.textColor} />
@@ -305,8 +341,17 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
             </ThemedText>
           </View>
 
-          <View style={[styles.searchContainer, { backgroundColor: theme.background }]}>
-            <IconSymbol name="magnifyingglass" size={20} color={theme.secondaryText} />
+          <View
+            style={[
+              styles.searchContainer,
+              { backgroundColor: theme.background },
+            ]}
+          >
+            <IconSymbol
+              name="magnifyingglass"
+              size={20}
+              color={theme.secondaryText}
+            />
             <TextInput
               style={[styles.searchInput, { color: theme.textColor }]}
               placeholder="Поиск группы..."
@@ -328,7 +373,12 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
             <ScrollView style={styles.departmentsList}>
               {filteredDepartments.map((dept, index) => (
                 <View key={index} style={styles.departmentSection}>
-                  <ThemedText style={[styles.departmentName, { color: theme.secondaryText }]}>
+                  <ThemedText
+                    style={[
+                      styles.departmentName,
+                      { color: theme.secondaryText },
+                    ]}
+                  >
                     {dept.name}
                   </ThemedText>
                   {dept.courses.map((course, courseIndex) => (
@@ -347,8 +397,8 @@ export function GroupSelectModal({ visible, onClose, onSelect, theme, currentGro
                                 borderColor: theme.borderColor,
                                 ...(currentGroup === group && {
                                   borderColor: theme.accentColor,
-                                })
-                              }
+                                }),
+                              },
                             ]}
                             onPress={() => {
                               onSelect(group);
@@ -387,11 +437,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-start',
-    ...(Platform.OS === 'web' ? {
-      display: 'flex',
-      alignItems: 'center',
-      paddingTop: 50,
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          display: 'flex',
+          alignItems: 'center',
+          paddingTop: 50,
+        }
+      : {}),
   },
   modalContent: {
     borderTopLeftRadius: 0,
@@ -401,16 +453,18 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 40 : 8,
     maxHeight: '90%',
 
-    ...(Platform.OS === 'web' ? {
-      maxWidth: 600,
-      width: '90%',
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      borderBottomLeftRadius: 20,
-      borderBottomRightRadius: 20,
-      position: 'relative',
-      top: 0,
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          maxWidth: 600,
+          width: '90%',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          position: 'relative',
+          top: 0,
+        }
+      : {}),
   },
   header: {
     flexDirection: 'row',
@@ -433,10 +487,12 @@ const styles = StyleSheet.create({
     marginTop: 0,
     padding: 8,
     borderRadius: 10,
-    ...(Platform.OS === 'ios' ? {
-      marginTop: -15,
-      marginBottom: 5,
-    } : {}),
+    ...(Platform.OS === 'ios'
+      ? {
+          marginTop: -15,
+          marginBottom: 5,
+        }
+      : {}),
   },
   searchInput: {
     flex: 1,
@@ -487,4 +543,4 @@ const styles = StyleSheet.create({
     padding: 32,
     textAlign: 'center',
   },
-}); 
+});

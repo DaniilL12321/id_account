@@ -1,5 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Image, Alert, TextInput, KeyboardAvoidingView, Platform, ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Image,
+  Alert,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
@@ -8,7 +18,8 @@ import { useTheme } from '@/app/context/theme';
 import Constants from 'expo-constants';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 
-const { OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } = Constants.expoConfig?.extra || {};
+const { OAUTH_URL, OAUTH_CLIENT_ID, OAUTH_SCOPE } =
+  Constants.expoConfig?.extra || {};
 
 export default function AuthScreen() {
   return (
@@ -32,7 +43,9 @@ function AuthContent() {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     inputBackground: isDarkMode ? '#2A2A2A' : '#F5F5F5',
     accentColor: '#2688EB',
@@ -47,16 +60,19 @@ function AuthContent() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=password&scope=${OAUTH_SCOPE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${OAUTH_URL}/access_token?client_id=${OAUTH_CLIENT_ID}&grant_type=password&scope=${OAUTH_SCOPE}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: login,
+            password: password,
+          }),
         },
-        body: JSON.stringify({
-          username: login,
-          password: password,
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -72,17 +88,23 @@ function AuthContent() {
         throw new Error(errorMessage);
       }
 
-      await AsyncStorage.setItem('auth_tokens', JSON.stringify({ ...data, issued_at: Date.now() }));
+      await AsyncStorage.setItem(
+        'auth_tokens',
+        JSON.stringify({ ...data, issued_at: Date.now() }),
+      );
       router.replace('/');
     } catch (error) {
       if (Platform.OS === 'web') {
-        const errorMessage = error instanceof Error ? error.message : 'Произошла ошибка';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Произошла ошибка';
         const alertContainer = document.createElement('div');
         alertContainer.style.position = 'fixed';
         alertContainer.style.top = '20px';
         alertContainer.style.left = '50%';
         alertContainer.style.transform = 'translateX(-50%)';
-        alertContainer.style.backgroundColor = isDarkMode ? '#1D1D1D' : '#FFFFFF';
+        alertContainer.style.backgroundColor = isDarkMode
+          ? '#1D1D1D'
+          : '#FFFFFF';
         alertContainer.style.color = isDarkMode ? '#FFFFFF' : '#000000';
         alertContainer.style.padding = '16px 24px';
         alertContainer.style.borderRadius = '12px';
@@ -103,7 +125,10 @@ function AuthContent() {
           }, 300);
         }, 3000);
       } else {
-        Alert.alert('Ошибка', error instanceof Error ? error.message : 'Произошла ошибка');
+        Alert.alert(
+          'Ошибка',
+          error instanceof Error ? error.message : 'Произошла ошибка',
+        );
       }
     } finally {
       setLoading(false);
@@ -117,41 +142,49 @@ function AuthContent() {
   }, []);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={[
-          styles.content,
-          Platform.OS === 'web' ? {
-            maxWidth: 400,
-            width: '100%',
-            marginHorizontal: 'auto',
-            paddingTop: 80,
-          } as ViewStyle : {}
-        ]}>
+        <View
+          style={[
+            styles.content,
+            Platform.OS === 'web'
+              ? ({
+                  maxWidth: 400,
+                  width: '100%',
+                  marginHorizontal: 'auto',
+                  paddingTop: 80,
+                } as ViewStyle)
+              : {},
+          ]}
+        >
           <View style={styles.header}>
             <Image
               source={require('@/assets/images/ystu-logo.png')}
               style={styles.logo}
               resizeMode="contain"
             />
-            <ThemedText style={styles.title}>
-              ЯГТУ ID
-            </ThemedText>
+            <ThemedText style={styles.title}>ЯГТУ ID</ThemedText>
             <ThemedText style={styles.subtitle}>
               Единая система авторизации
             </ThemedText>
           </View>
 
-          <View style={[
-            styles.form,
-            { backgroundColor: theme.cardBackground },
-            Platform.OS === 'web' ? {
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            } as ViewStyle : {}
-          ]}>
+          <View
+            style={[
+              styles.form,
+              { backgroundColor: theme.cardBackground },
+              Platform.OS === 'web'
+                ? ({
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  } as ViewStyle)
+                : {},
+            ]}
+          >
             <View style={styles.inputContainer}>
               <TextInput
                 style={[
@@ -159,7 +192,7 @@ function AuthContent() {
                   {
                     backgroundColor: theme.inputBackground,
                     color: theme.textColor,
-                  }
+                  },
                 ]}
                 placeholder="Логин"
                 placeholderTextColor={theme.secondaryText}
@@ -180,7 +213,7 @@ function AuthContent() {
                     {
                       backgroundColor: theme.inputBackground,
                       color: theme.textColor,
-                    }
+                    },
                   ]}
                   placeholder="Пароль"
                   placeholderTextColor={theme.secondaryText}
@@ -191,11 +224,14 @@ function AuthContent() {
                   onSubmitEditing={handleLogin}
                 />
                 <TouchableOpacity
-                  style={[styles.passwordToggle, { backgroundColor: theme.inputBackground }]}
+                  style={[
+                    styles.passwordToggle,
+                    { backgroundColor: theme.inputBackground },
+                  ]}
                   onPress={() => setShowPassword(!showPassword)}
                 >
                   <IconSymbol
-                    name={showPassword ? "eye.slash.fill" : "eye.fill"}
+                    name={showPassword ? 'eye.slash.fill' : 'eye.fill'}
                     size={20}
                     color={theme.secondaryText}
                   />
@@ -234,10 +270,12 @@ function AuthContent() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    ...(Platform.OS === 'web' ? {
-      height: '100vh',
-      minHeight: '100vh',
-    } as unknown as ViewStyle : {}),
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100vh',
+          minHeight: '100vh',
+        } as unknown as ViewStyle)
+      : {}),
   },
   container: {
     flex: 1,
@@ -323,4 +361,4 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
   },
-}); 
+});

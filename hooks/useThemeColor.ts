@@ -8,7 +8,7 @@ import { useTheme } from '@/app/context/theme';
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: keyof typeof Colors.light & keyof typeof Colors.dark,
 ) {
   const { isDarkMode } = useTheme();
   const theme = isDarkMode ? 'dark' : 'light';

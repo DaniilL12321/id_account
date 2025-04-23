@@ -20,13 +20,19 @@ export default function TabLayout() {
           tabBarInactiveTintColor: '#8E8E93',
           headerShown: false,
           tabBarButton: HapticTab,
-          tabBarBackground: Platform.OS === 'ios' ? TabBarBackground : undefined,
+          tabBarBackground:
+            Platform.OS === 'ios' ? TabBarBackground : undefined,
           tabBarStyle: Platform.select({
             ios: {
               position: 'absolute',
-              backgroundColor: themeMode === 'system'
-                ? (isDarkMode ? '#000000' : '#FFFFFF')
-                : themeMode === 'dark' ? '#000000' : '#FFFFFF',
+              backgroundColor:
+                themeMode === 'system'
+                  ? isDarkMode
+                    ? '#000000'
+                    : '#FFFFFF'
+                  : themeMode === 'dark'
+                  ? '#000000'
+                  : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,
@@ -41,49 +47,66 @@ export default function TabLayout() {
               height: 60,
               paddingTop: 8,
               paddingBottom: 8,
-              backgroundColor: themeMode === 'system'
-                ? (isDarkMode ? '#000000' : '#FFFFFF')
-                : themeMode === 'dark' ? '#000000' : '#FFFFFF',
+              backgroundColor:
+                themeMode === 'system'
+                  ? isDarkMode
+                    ? '#000000'
+                    : '#FFFFFF'
+                  : themeMode === 'dark'
+                  ? '#000000'
+                  : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,
               zIndex: 1000,
             },
             default: {
-              backgroundColor: themeMode === 'system'
-                ? (isDarkMode ? '#000000' : '#FFFFFF')
-                : themeMode === 'dark' ? '#000000' : '#FFFFFF',
+              backgroundColor:
+                themeMode === 'system'
+                  ? isDarkMode
+                    ? '#000000'
+                    : '#FFFFFF'
+                  : themeMode === 'dark'
+                  ? '#000000'
+                  : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,
-            }
+            },
           }),
           tabBarLabelStyle: Platform.select({
             web: {
               fontSize: 12,
               marginTop: 4,
-            }
+            },
           }),
-        }}>
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
             title: 'Главная',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="house.fill" color={color} />
+            ),
           }}
         />
         <Tabs.Screen
           name="student"
           options={{
             title: 'Студент',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="person.fill" color={color} />
+            ),
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
             title: 'Настройки',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="gearshape.fill" color={color} />
+            ),
           }}
         />
       </Tabs>

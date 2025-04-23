@@ -1,4 +1,15 @@
-import { StyleSheet, Platform, ScrollView, SafeAreaView, Image, TouchableOpacity, View, ViewStyle, Modal, Pressable } from 'react-native';
+import {
+  StyleSheet,
+  Platform,
+  ScrollView,
+  SafeAreaView,
+  Image,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+  Modal,
+  Pressable,
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -15,7 +26,7 @@ import Animated, {
   withSequence,
   withTiming,
   useSharedValue,
-  withDelay
+  withDelay,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { BlurView } from 'expo-blur';
@@ -61,14 +72,11 @@ const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
   React.useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withDelay(
-          Math.random() * 500,
-          withTiming(0.7, { duration: 1000 })
-        ),
-        withTiming(0.3, { duration: 1000 })
+        withDelay(Math.random() * 500, withTiming(0.7, { duration: 1000 })),
+        withTiming(0.3, { duration: 1000 }),
       ),
       -1,
-      true
+      true,
     );
   }, []);
 
@@ -93,43 +101,78 @@ const StudentProfileSkeleton = ({ theme }: { theme: ThemeConfig }) => {
       style={styles.scrollView}
       contentContainerStyle={[
         styles.scrollContent,
-        { padding: 16, gap: 16, paddingBottom: 80 }
+        { padding: 16, gap: 16, paddingBottom: 80 },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[
+          styles.profileHeader,
+          { backgroundColor: theme.cardBackground },
+        ]}
+      >
         <SkeletonLoader style={{ width: 80, height: 80, borderRadius: 40 }} />
-        <SkeletonLoader style={{ width: 200, height: 24, borderRadius: 8, marginTop: 16 }} />
-        <SkeletonLoader style={{ width: 250, height: 18, borderRadius: 8, marginTop: 4 }} />
+        <SkeletonLoader
+          style={{ width: 200, height: 24, borderRadius: 8, marginTop: 16 }}
+        />
+        <SkeletonLoader
+          style={{ width: 250, height: 18, borderRadius: 8, marginTop: 4 }}
+        />
       </ThemedView>
 
-      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.section, { backgroundColor: theme.cardBackground }]}
+      >
         {[1, 2, 3].map((i) => (
           <ThemedView key={i} style={styles.sectionItem}>
-            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader
+              style={{ width: 20, height: 20, borderRadius: 10 }}
+            />
             <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
-            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+            <SkeletonLoader
+              style={{ width: 16, height: 16, borderRadius: 8 }}
+            />
           </ThemedView>
         ))}
       </ThemedView>
 
-      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-        <SkeletonLoader style={{ width: 120, height: 22, borderRadius: 8, margin: 16, marginBottom: 8 }} />
+      <ThemedView
+        style={[styles.section, { backgroundColor: theme.cardBackground }]}
+      >
+        <SkeletonLoader
+          style={{
+            width: 120,
+            height: 22,
+            borderRadius: 8,
+            margin: 16,
+            marginBottom: 8,
+          }}
+        />
         {[1, 2, 3].map((i) => (
           <ThemedView key={i} style={styles.sectionItem}>
-            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader
+              style={{ width: 20, height: 20, borderRadius: 10 }}
+            />
             <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
-            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+            <SkeletonLoader
+              style={{ width: 16, height: 16, borderRadius: 8 }}
+            />
           </ThemedView>
         ))}
       </ThemedView>
 
-      <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.section, { backgroundColor: theme.cardBackground }]}
+      >
         {[1, 2].map((i) => (
           <ThemedView key={i} style={styles.sectionItem}>
-            <SkeletonLoader style={{ width: 20, height: 20, borderRadius: 10 }} />
+            <SkeletonLoader
+              style={{ width: 20, height: 20, borderRadius: 10 }}
+            />
             <SkeletonLoader style={{ flex: 1, height: 20, borderRadius: 8 }} />
-            <SkeletonLoader style={{ width: 16, height: 16, borderRadius: 8 }} />
+            <SkeletonLoader
+              style={{ width: 16, height: 16, borderRadius: 8 }}
+            />
           </ThemedView>
         ))}
       </ThemedView>
@@ -141,15 +184,21 @@ export default function StudentProfileScreen() {
   const { isDarkMode } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<CheckResponse['auth_info']['user'] | null>(null);
-  const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(null);
+  const [userInfo, setUserInfo] = useState<
+    CheckResponse['auth_info']['user'] | null
+  >(null);
+  const [userDetails, setUserDetails] = useState<UserDetailsResponse | null>(
+    null,
+  );
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
   };
@@ -170,7 +219,7 @@ export default function StudentProfileScreen() {
 
       const checkResponse = await fetch(`${OAUTH_URL}/check`, {
         headers: {
-          'Authorization': `Bearer ${access_token}`,
+          Authorization: `Bearer ${access_token}`,
         },
       });
 
@@ -183,7 +232,7 @@ export default function StudentProfileScreen() {
 
       const detailsResponse = await fetch(`${API_URL}/s/general/v1/user/my`, {
         headers: {
-          'Authorization': `Bearer ${access_token}`,
+          Authorization: `Bearer ${access_token}`,
         },
       });
 
@@ -237,7 +286,9 @@ export default function StudentProfileScreen() {
             <StudentProfileSkeleton theme={theme} />
           ) : (
             <ThemedView style={styles.loadingContainer}>
-              <ThemedText style={styles.error}>{error || 'Не удалось загрузить данные'}</ThemedText>
+              <ThemedText style={styles.error}>
+                {error || 'Не удалось загрузить данные'}
+              </ThemedText>
             </ThemedView>
           )}
         </SafeAreaView>
@@ -252,51 +303,90 @@ export default function StudentProfileScreen() {
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { padding: 16, gap: 16, paddingBottom: 80 }
+            { padding: 16, gap: 16, paddingBottom: 80 },
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <ThemedView style={[styles.profileHeader, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[
+              styles.profileHeader,
+              { backgroundColor: theme.cardBackground },
+            ]}
+          >
             {userInfo.photoUrl ? (
               <TouchableOpacity onPress={handleAvatarPress}>
-                <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+                <Image
+                  source={{ uri: userInfo.photoUrl }}
+                  style={styles.avatar}
+                />
               </TouchableOpacity>
             ) : (
-              <ThemedView style={[styles.avatarPlaceholder, { backgroundColor: theme.accentColor }]}>
+              <ThemedView
+                style={[
+                  styles.avatarPlaceholder,
+                  { backgroundColor: theme.accentColor },
+                ]}
+              >
                 <ThemedText style={styles.avatarText}>
-                  {userInfo.firstName[0]}{userInfo.lastName[0]}
+                  {userInfo.firstName[0]}
+                  {userInfo.lastName[0]}
                 </ThemedText>
               </ThemedView>
             )}
             <ThemedText style={[styles.userName, { color: theme.textColor }]}>
               {userInfo.firstName} {userInfo.lastName}
             </ThemedText>
-            <ThemedText style={[styles.userGroup, { color: theme.secondaryText }]}>
-              {userInfo.groupName} • {userDetails.course} курс • {userDetails.sourceFinancingStr}
+            <ThemedText
+              style={[styles.userGroup, { color: theme.secondaryText }]}
+            >
+              {userInfo.groupName} • {userDetails.course} курс •{' '}
+              {userDetails.sourceFinancingStr}
             </ThemedText>
           </ThemedView>
 
-          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.cardBackground }]}
+          >
             <TouchableOpacity
               style={styles.sectionItem}
               onPress={handleInfoPress}
             >
-              <IconSymbol name="person.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <IconSymbol
+                name="person.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Личная информация
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.sectionItem}
               onPress={handleMarksPress}
             >
-              <IconSymbol name="chart.bar.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <IconSymbol
+                name="chart.bar.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Полная успеваемость
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -304,16 +394,30 @@ export default function StudentProfileScreen() {
               onPress={handleDisabledPress}
               disabled={true}
             >
-              <IconSymbol name="photo.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <IconSymbol
+                name="photo.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Портфолио
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
           </ThemedView>
 
-          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-            <ThemedText style={[styles.sectionTitle, { color: theme.textColor }]}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.cardBackground }]}
+          >
+            <ThemedText
+              style={[styles.sectionTitle, { color: theme.textColor }]}
+            >
               Документы
             </ThemedText>
 
@@ -323,13 +427,19 @@ export default function StudentProfileScreen() {
               disabled={true}
             >
               <IconSymbol name="doc.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Справки
               </ThemedText>
               {/* <ThemedView style={styles.badge}>
                 <ThemedText style={styles.badgeText}>Новое</ThemedText>
               </ThemedView> */}
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -337,11 +447,21 @@ export default function StudentProfileScreen() {
               onPress={handleDisabledPress}
               disabled={true}
             >
-              <IconSymbol name="doc.text.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <IconSymbol
+                name="doc.text.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Заявления
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -350,24 +470,38 @@ export default function StudentProfileScreen() {
               disabled={true}
             >
               <IconSymbol name="qrcode" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 QR Сертификаты
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
           </ThemedView>
 
-          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.cardBackground }]}
+          >
             <TouchableOpacity
               style={[styles.sectionItem, { opacity: 0.5 }]}
               onPress={handleDisabledPress}
               disabled={true}
             >
               <IconSymbol name="gear" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Настройки профиля
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -376,10 +510,16 @@ export default function StudentProfileScreen() {
               disabled={true}
             >
               <IconSymbol name="bell" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.sectionItemText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.sectionItemText, { color: theme.textColor }]}
+              >
                 Уведомления
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
           </ThemedView>
         </ScrollView>
@@ -570,4 +710,3 @@ const styles = StyleSheet.create({
     }),
   },
 });
-

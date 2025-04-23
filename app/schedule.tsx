@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { StyleSheet, Platform, ScrollView, TouchableOpacity, ViewStyle, Dimensions, View, Animated } from 'react-native';
+import {
+  StyleSheet,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  ViewStyle,
+  Dimensions,
+  View,
+  Animated,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedView } from '@/components/ThemedView';
@@ -113,9 +122,12 @@ const updateRequestCounter = async () => {
     const now = Date.now();
     const newCounter = {
       count: counter.count + 1,
-      timestamp: counter.timestamp
+      timestamp: counter.timestamp,
     };
-    await AsyncStorage.setItem('schedule_request_counter', JSON.stringify(newCounter));
+    await AsyncStorage.setItem(
+      'schedule_request_counter',
+      JSON.stringify(newCounter),
+    );
     return newCounter;
   } catch (error) {
     console.error('Error updating request counter:', error);
@@ -196,7 +208,9 @@ export default function ScheduleScreen() {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
   };
@@ -205,8 +219,8 @@ export default function ScheduleScreen() {
     try {
       const response = await fetch(`${OAUTH_URL}/check`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       const data = await response.json();
       if (data.auth_info?.auth === 1) {
@@ -222,21 +236,25 @@ export default function ScheduleScreen() {
 
   const initializeCurrentSchedule = (scheduleData: ScheduleDay[]) => {
     const now = getMskDate();
-    const sortedDays = scheduleData.sort((a, b) =>
-      new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
+    const sortedDays = scheduleData.sort(
+      (a, b) =>
+        new Date(a.info.date).getTime() - new Date(b.info.date).getTime(),
     );
 
-    const todaySchedule = sortedDays.find(day => {
+    const todaySchedule = sortedDays.find((day) => {
       const scheduleDate = new Date(day.info.date);
       return scheduleDate.toDateString() === now.toDateString();
     });
 
-    const weeks = Array.from(new Set(scheduleData.map(day => day.info.weekNumber)))
-      .sort((a, b) => a - b);
+    const weeks = Array.from(
+      new Set(scheduleData.map((day) => day.info.weekNumber)),
+    ).sort((a, b) => a - b);
 
     if (todaySchedule) {
       const weekIndex = weeks.indexOf(todaySchedule.info.weekNumber);
-      const dayIndex = sortedDays.findIndex(day => day.info.date === todaySchedule.info.date);
+      const dayIndex = sortedDays.findIndex(
+        (day) => day.info.date === todaySchedule.info.date,
+      );
 
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
@@ -247,17 +265,19 @@ export default function ScheduleScreen() {
           const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
-            animated: false
+            animated: false,
           });
         }
       }, 100);
       return;
     }
 
-    const nextDay = sortedDays.find(day => new Date(day.info.date) > now);
+    const nextDay = sortedDays.find((day) => new Date(day.info.date) > now);
     if (nextDay) {
       const weekIndex = weeks.indexOf(nextDay.info.weekNumber);
-      const dayIndex = sortedDays.findIndex(day => day.info.date === nextDay.info.date);
+      const dayIndex = sortedDays.findIndex(
+        (day) => day.info.date === nextDay.info.date,
+      );
 
       setCurrentWeekIndex(weekIndex);
       setSelectedWeek(weekIndex);
@@ -268,7 +288,7 @@ export default function ScheduleScreen() {
           const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
-            animated: false
+            animated: false,
           });
         }
       }, 100);
@@ -289,7 +309,7 @@ export default function ScheduleScreen() {
           const weekWidth = getContainerWidth() - 16;
           lessonsScrollViewRef.current.scrollTo({
             x: dayIndex * weekWidth,
-            animated: false
+            animated: false,
           });
         }
       }, 100);
@@ -308,23 +328,32 @@ export default function ScheduleScreen() {
 
       const counter = await updateRequestCounter();
 
-      const response = await fetch(`${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(groupName)}`);
+      const response = await fetch(
+        `${API_URL}/s/schedule/v1/schedule/group/${encodeURIComponent(
+          groupName,
+        )}`,
+      );
       const data: ScheduleResponse = await response.json();
 
-      const allDays = data.items.flatMap(item => item.days)
-        .filter(day => {
+      const allDays = data.items
+        .flatMap((item) => item.days)
+        .filter((day) => {
           const date = new Date(day.info.date);
           return isCurrentSemester(date);
         })
-        .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime());
+        .sort(
+          (a, b) =>
+            new Date(a.info.date).getTime() - new Date(b.info.date).getTime(),
+        );
 
       if (counter && counter.count >= REQUEST_LIMIT) {
         await setCachedSchedule(allDays);
 
         setTimeout(async () => {
           await AsyncStorage.removeItem('schedule_cache');
-          await AsyncStorage.setItem('schedule_request_counter',
-            JSON.stringify({ count: 0, timestamp: Date.now() })
+          await AsyncStorage.setItem(
+            'schedule_request_counter',
+            JSON.stringify({ count: 0, timestamp: Date.now() }),
           );
         }, CACHE_DURATION);
       }
@@ -379,7 +408,7 @@ export default function ScheduleScreen() {
           duration: 1500,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -405,29 +434,32 @@ export default function ScheduleScreen() {
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       day: 'numeric',
-      month: 'long'
+      month: 'long',
     };
     return date.toLocaleDateString('ru-RU', options);
   };
 
-  const weeks = Array.from(new Set(schedule.map(day => day.info.weekNumber)))
-    .sort((a, b) => a - b);
+  const weeks = Array.from(
+    new Set(schedule.map((day) => day.info.weekNumber)),
+  ).sort((a, b) => a - b);
 
   const groupScheduleByWeeks = (schedule: ScheduleDay[]): WeekSchedule[] => {
     const weekMap = new Map<number, ScheduleDay[]>();
 
-    schedule.forEach(day => {
+    schedule.forEach((day) => {
       if (!weekMap.has(day.info.weekNumber)) {
         weekMap.set(day.info.weekNumber, []);
       }
       weekMap.get(day.info.weekNumber)?.push(day);
     });
 
-    return Array.from(weekMap.entries())
-      .map(([weekNumber, days]) => ({
-        weekNumber,
-        days: days.sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime())
-      }));
+    return Array.from(weekMap.entries()).map(([weekNumber, days]) => ({
+      weekNumber,
+      days: days.sort(
+        (a, b) =>
+          new Date(a.info.date).getTime() - new Date(b.info.date).getTime(),
+      ),
+    }));
   };
 
   const weekScrollViewRef = useRef<ScrollView>(null);
@@ -437,11 +469,17 @@ export default function ScheduleScreen() {
       const scrollToOffset = currentWeekIndex * (getContainerWidth() - 16);
 
       if (Platform.OS === 'web') {
-        weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: true });
+        weekScrollViewRef.current.scrollTo({
+          x: scrollToOffset,
+          animated: true,
+        });
       } else {
         setTimeout(() => {
           if (weekScrollViewRef.current) {
-            weekScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
+            weekScrollViewRef.current.scrollTo({
+              x: scrollToOffset,
+              animated: false,
+            });
           }
         }, 100);
       }
@@ -455,14 +493,19 @@ export default function ScheduleScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
 
-    const sortedDays = schedule
-      .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime());
+    const sortedDays = schedule.sort(
+      (a, b) =>
+        new Date(a.info.date).getTime() - new Date(b.info.date).getTime(),
+    );
 
-    const dayIndex = sortedDays.findIndex(day => day.info.date === date);
+    const dayIndex = sortedDays.findIndex((day) => day.info.date === date);
 
     if (lessonsScrollViewRef.current && dayIndex !== -1) {
       const scrollToOffset = dayIndex * (getContainerWidth() - 16);
-      lessonsScrollViewRef.current.scrollTo({ x: scrollToOffset, animated: false });
+      lessonsScrollViewRef.current.scrollTo({
+        x: scrollToOffset,
+        animated: false,
+      });
     }
   };
 
@@ -473,7 +516,8 @@ export default function ScheduleScreen() {
 
     const weekWidth = getContainerWidth() - 16;
     const nearestWeekIndex = Math.round(currentX / weekWidth);
-    const currentWeekSchedule = groupScheduleByWeeks(schedule)[nearestWeekIndex];
+    const currentWeekSchedule =
+      groupScheduleByWeeks(schedule)[nearestWeekIndex];
 
     if (currentWeekSchedule?.weekNumber !== currentWeekNumber) {
       setCurrentWeekNumber(currentWeekSchedule?.weekNumber);
@@ -488,7 +532,7 @@ export default function ScheduleScreen() {
         Haptics.impactAsync(
           velocity > 2
             ? Haptics.ImpactFeedbackStyle.Heavy
-            : Haptics.ImpactFeedbackStyle.Light
+            : Haptics.ImpactFeedbackStyle.Light,
         );
       }
     }
@@ -509,9 +553,10 @@ export default function ScheduleScreen() {
         weekScrollViewRef.current?.scrollTo({ x: targetX, animated: true });
       }
     } else {
-      const feedbackStyle = scrollVelocity > 2
-        ? Haptics.ImpactFeedbackStyle.Heavy
-        : scrollVelocity > 1
+      const feedbackStyle =
+        scrollVelocity > 2
+          ? Haptics.ImpactFeedbackStyle.Heavy
+          : scrollVelocity > 1
           ? Haptics.ImpactFeedbackStyle.Medium
           : Haptics.ImpactFeedbackStyle.Light;
 
@@ -538,7 +583,11 @@ export default function ScheduleScreen() {
   const renderGroupIcon = () => {
     if (Platform.OS === 'web') {
       return (
-        <ThemedText style={{ color: theme.secondaryText, marginLeft: 2, marginTop: 5 }}>▼</ThemedText>
+        <ThemedText
+          style={{ color: theme.secondaryText, marginLeft: 2, marginTop: 5 }}
+        >
+          ▼
+        </ThemedText>
       );
     }
     return (
@@ -552,8 +601,9 @@ export default function ScheduleScreen() {
     const x = event.nativeEvent.contentOffset.x;
     const weekWidth = getContainerWidth() - 16;
 
-    const allDays = schedule.sort((a, b) =>
-      new Date(a.info.date).getTime() - new Date(b.info.date).getTime()
+    const allDays = schedule.sort(
+      (a, b) =>
+        new Date(a.info.date).getTime() - new Date(b.info.date).getTime(),
     );
 
     const nearestDayIndex = Math.round(x / weekWidth);
@@ -565,7 +615,10 @@ export default function ScheduleScreen() {
         setSelectedWeek(weekIndex);
         if (weekScrollViewRef.current) {
           const weekScrollOffset = weekIndex * weekWidth;
-          weekScrollViewRef.current.scrollTo({ x: weekScrollOffset, animated: true });
+          weekScrollViewRef.current.scrollTo({
+            x: weekScrollOffset,
+            animated: true,
+          });
         }
 
         if (Platform.OS !== 'web') {
@@ -602,7 +655,10 @@ export default function ScheduleScreen() {
 
   const getWeekContainerStyle = () => ({
     ...styles.weekContainer,
-    width: Platform.OS === 'web' ? containerWidth - 64 : Dimensions.get('window').width - 32,
+    width:
+      Platform.OS === 'web'
+        ? containerWidth - 64
+        : Dimensions.get('window').width - 32,
     ...(Platform.OS === 'web' && {
       maxWidth: containerWidth - 32,
     }),
@@ -610,16 +666,18 @@ export default function ScheduleScreen() {
 
   const getDayButtonStyle = () => ({
     ...styles.dayButton,
-    minWidth: Platform.OS === 'web'
-      ? (containerWidth - 32 - 32 - 40) / 7
-      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+    minWidth:
+      Platform.OS === 'web'
+        ? (containerWidth - 32 - 32 - 40) / 7
+        : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
   });
 
   const getSkeletonDayStyle = () => ({
     ...styles.skeletonDay,
-    minWidth: Platform.OS === 'web'
-      ? (containerWidth + 32 + 32 + 40) / 7
-      : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+    minWidth:
+      Platform.OS === 'web'
+        ? (containerWidth + 32 + 32 + 40) / 7
+        : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
   });
 
   if (loading) {
@@ -627,38 +685,48 @@ export default function ScheduleScreen() {
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <Container>
-          <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+          <SafeAreaView
+            style={[styles.safeArea, { backgroundColor: theme.background }]}
+          >
             <ScrollView
               style={[styles.scrollView, { backgroundColor: theme.background }]}
               contentContainerStyle={[
                 styles.scrollContent,
-                { padding: 16, gap: 16, paddingBottom: 80 }
+                { padding: 16, gap: 16, paddingBottom: 80 },
               ]}
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.header}>
                 <TouchableOpacity onPress={handleBackPress}>
-                  <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
+                  <IconSymbol
+                    name="chevron.left"
+                    size={24}
+                    color={theme.textColor}
+                  />
                 </TouchableOpacity>
                 <ThemedText style={[styles.title, { color: theme.textColor }]}>
                   Расписание
                 </ThemedText>
               </View>
 
-              <ThemedView style={[
-                styles.weekContainer,
-                {
-                  backgroundColor: theme.cardBackground,
-                  height: 121,
-                  ...(Platform.OS === 'web' ? {
-                    marginTop: 14,
-                    marginLeft: 14,
-                    height: 120,
-                    maxWidth: '100%',
-                    alignSelf: 'center',
-                  } : {})
-                }
-              ]}>
+              <ThemedView
+                style={[
+                  styles.weekContainer,
+                  {
+                    backgroundColor: theme.cardBackground,
+                    height: 121,
+                    ...(Platform.OS === 'web'
+                      ? {
+                          marginTop: 14,
+                          marginLeft: 14,
+                          height: 120,
+                          maxWidth: '100%',
+                          alignSelf: 'center',
+                        }
+                      : {}),
+                  },
+                ]}
+              >
                 <Animated.View
                   style={[
                     styles.skeletonText,
@@ -669,10 +737,12 @@ export default function ScheduleScreen() {
                       marginLeft: -4,
                       width: '10%',
                       marginBottom: 16,
-                      ...(Platform.OS === 'web' ? {
-                        width: '10%',
-                      } : {})
-                    }
+                      ...(Platform.OS === 'web'
+                        ? {
+                            width: '10%',
+                          }
+                        : {}),
+                    },
                   ]}
                 />
                 <View style={styles.daysGrid}>
@@ -684,7 +754,7 @@ export default function ScheduleScreen() {
                         {
                           backgroundColor: isDarkMode ? '#333333' : '#DEDEDE',
                           opacity: fadeAnim,
-                        }
+                        },
                       ]}
                     />
                   ))}
@@ -699,12 +769,14 @@ export default function ScheduleScreen() {
                     {
                       marginTop: 8,
                       height: 130,
-                      ...(Platform.OS === 'web' ? {
-                        width: '95%',
-                        marginLeft: 16,
-                        marginRight: 16,
-                      } : {})
-                    }
+                      ...(Platform.OS === 'web'
+                        ? {
+                            width: '95%',
+                            marginLeft: 16,
+                            marginRight: 16,
+                          }
+                        : {}),
+                    },
                   ]}
                 >
                   <Animated.View
@@ -714,10 +786,15 @@ export default function ScheduleScreen() {
                         height: 100,
                         backgroundColor: isDarkMode ? '#333333' : '#DEDEDE',
                         opacity: fadeAnim,
-                      }
+                      },
                     ]}
                   />
-                  <View style={[styles.lessonTypeLine, { backgroundColor: isDarkMode ? '#333333' : '#DEDEDE' }]} />
+                  <View
+                    style={[
+                      styles.lessonTypeLine,
+                      { backgroundColor: isDarkMode ? '#333333' : '#DEDEDE' },
+                    ]}
+                  />
                   <View style={styles.lessonInfo}>
                     <Animated.View
                       style={[
@@ -727,10 +804,12 @@ export default function ScheduleScreen() {
                           opacity: fadeAnim,
                           width: '80%',
                           marginBottom: 8,
-                          ...(Platform.OS === 'web' ? {
-                            width: '40%',
-                          } : {})
-                        }
+                          ...(Platform.OS === 'web'
+                            ? {
+                                width: '40%',
+                              }
+                            : {}),
+                        },
                       ]}
                     />
                     <Animated.View
@@ -741,10 +820,12 @@ export default function ScheduleScreen() {
                           opacity: fadeAnim,
                           width: '20%',
                           marginBottom: 8,
-                          ...(Platform.OS === 'web' ? {
-                            width: '10%',
-                          } : {})
-                        }
+                          ...(Platform.OS === 'web'
+                            ? {
+                                width: '10%',
+                              }
+                            : {}),
+                        },
                       ]}
                     />
                     <Animated.View
@@ -755,10 +836,12 @@ export default function ScheduleScreen() {
                           opacity: fadeAnim,
                           width: '30%',
                           marginBottom: 8,
-                          ...(Platform.OS === 'web' ? {
-                            width: '15%',
-                          } : {})
-                        }
+                          ...(Platform.OS === 'web'
+                            ? {
+                                width: '15%',
+                              }
+                            : {}),
+                        },
                       ]}
                     />
                     <Animated.View
@@ -769,10 +852,12 @@ export default function ScheduleScreen() {
                           opacity: fadeAnim,
                           width: '60%',
                           marginBottom: 8,
-                          ...(Platform.OS === 'web' ? {
-                            width: '25%',
-                          } : {})
-                        }
+                          ...(Platform.OS === 'web'
+                            ? {
+                                width: '25%',
+                              }
+                            : {}),
+                        },
                       ]}
                     />
                   </View>
@@ -785,24 +870,32 @@ export default function ScheduleScreen() {
     );
   }
 
-  const currentWeekSchedule = schedule.filter(day => day.info.weekNumber === weeks[selectedWeek]);
+  const currentWeekSchedule = schedule.filter(
+    (day) => day.info.weekNumber === weeks[selectedWeek],
+  );
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <Container>
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+        <SafeAreaView
+          style={[styles.safeArea, { backgroundColor: theme.background }]}
+        >
           <ScrollView
             style={[styles.scrollView, { backgroundColor: theme.background }]}
             contentContainerStyle={[
               styles.scrollContent,
-              { padding: 16, gap: 16, paddingBottom: 200 }
+              { padding: 16, gap: 16, paddingBottom: 200 },
             ]}
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
               <TouchableOpacity onPress={handleBackPress}>
-                <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
+                <IconSymbol
+                  name="chevron.left"
+                  size={24}
+                  color={theme.textColor}
+                />
               </TouchableOpacity>
               <ThemedText style={[styles.title, { color: theme.textColor }]}>
                 Расписание
@@ -811,10 +904,14 @@ export default function ScheduleScreen() {
                 onPress={() => setModalVisible(true)}
                 style={styles.groupButton}
               >
-                <ThemedText style={[styles.separator, { color: theme.secondaryText }]}>
+                <ThemedText
+                  style={[styles.separator, { color: theme.secondaryText }]}
+                >
                   •
                 </ThemedText>
-                <ThemedText style={[styles.groupText, { color: theme.secondaryText }]}>
+                <ThemedText
+                  style={[styles.groupText, { color: theme.secondaryText }]}
+                >
                   {groupName}
                 </ThemedText>
                 {renderGroupIcon()}
@@ -833,29 +930,39 @@ export default function ScheduleScreen() {
               onScroll={handleScroll}
               onMomentumScrollEnd={handleWeekScroll}
               scrollEventThrottle={16}
-              contentContainerStyle={Platform.OS === 'web' ? {
-                marginTop: 14,
-                maxWidth: getContainerWidth(),
-                alignSelf: 'center'
-              } : undefined}
+              contentContainerStyle={
+                Platform.OS === 'web'
+                  ? {
+                      marginTop: 14,
+                      maxWidth: getContainerWidth(),
+                      alignSelf: 'center',
+                    }
+                  : undefined
+              }
             >
               {groupScheduleByWeeks(schedule).map((week, weekIndex) => (
                 <ThemedView
                   key={week.weekNumber}
                   style={[
                     getWeekContainerStyle(),
-                    { backgroundColor: theme.cardBackground }
+                    { backgroundColor: theme.cardBackground },
                   ]}
                 >
-                  <ThemedText style={[styles.weekTitle, { color: theme.secondaryText }]}>
-                    {week.weekNumber > 0 ? `${week.weekNumber} неделя` : 'Сессия'}
+                  <ThemedText
+                    style={[styles.weekTitle, { color: theme.secondaryText }]}
+                  >
+                    {week.weekNumber > 0
+                      ? `${week.weekNumber} неделя`
+                      : 'Сессия'}
                   </ThemedText>
 
                   <ThemedView style={styles.daysGrid}>
                     {week.days.map((day) => {
                       const date = new Date(day.info.date);
                       const isSelected = selectedDay === day.info.date;
-                      const isToday = new Date(day.info.date).toDateString() === getMskDate().toDateString();
+                      const isToday =
+                        new Date(day.info.date).toDateString() ===
+                        getMskDate().toDateString();
 
                       return (
                         <TouchableOpacity
@@ -863,23 +970,34 @@ export default function ScheduleScreen() {
                           style={[
                             getDayButtonStyle(),
                             {
-                              backgroundColor: isSelected ? theme.accentColor : theme.background,
+                              backgroundColor: isSelected
+                                ? theme.accentColor
+                                : theme.background,
                               borderColor: theme.borderColor,
                               opacity: isToday ? 1 : 0.8,
-                              ...(Platform.OS === 'web' ? { transition: 'background-color 0.2s ease-in-out' } : {}),
-                            }
+                              ...(Platform.OS === 'web'
+                                ? {
+                                    transition:
+                                      'background-color 0.2s ease-in-out',
+                                  }
+                                : {}),
+                            },
                           ]}
                           onPress={() => handleDaySelect(day.info.date)}
                           onLongPress={async () => {
                             if (Platform.OS !== 'web') {
-                              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                              await Haptics.notificationAsync(
+                                Haptics.NotificationFeedbackType.Success,
+                              );
                             }
                           }}
                         >
                           <ThemedText
                             style={[
                               styles.dayNumber,
-                              { color: isSelected ? '#FFFFFF' : theme.textColor }
+                              {
+                                color: isSelected ? '#FFFFFF' : theme.textColor,
+                              },
                             ]}
                           >
                             {date.getDate()}
@@ -887,10 +1005,16 @@ export default function ScheduleScreen() {
                           <ThemedText
                             style={[
                               styles.dayName,
-                              { color: isSelected ? '#FFFFFF' : theme.secondaryText }
+                              {
+                                color: isSelected
+                                  ? '#FFFFFF'
+                                  : theme.secondaryText,
+                              },
                             ]}
                           >
-                            {date.toLocaleDateString('ru-RU', { weekday: 'short' })}
+                            {date.toLocaleDateString('ru-RU', {
+                              weekday: 'short',
+                            })}
                           </ThemedText>
                         </TouchableOpacity>
                       );
@@ -910,24 +1034,37 @@ export default function ScheduleScreen() {
               pagingEnabled={Platform.OS === 'web'}
               onScroll={handleLessonsScroll}
               scrollEventThrottle={16}
-              contentContainerStyle={Platform.OS === 'web' ? {
-                maxWidth: getContainerWidth(),
-                alignSelf: 'center'
-              } : undefined}
+              contentContainerStyle={
+                Platform.OS === 'web'
+                  ? {
+                      maxWidth: getContainerWidth(),
+                      alignSelf: 'center',
+                    }
+                  : undefined
+              }
             >
               {schedule
-                .sort((a, b) => new Date(a.info.date).getTime() - new Date(b.info.date).getTime())
+                .sort(
+                  (a, b) =>
+                    new Date(a.info.date).getTime() -
+                    new Date(b.info.date).getTime(),
+                )
                 .map((day) => (
                   <View
                     key={day.info.date}
                     style={{
-                      width: Platform.OS === 'web' ? getContainerWidth() - 16 : Dimensions.get('window').width - 16,
+                      width:
+                        Platform.OS === 'web'
+                          ? getContainerWidth() - 16
+                          : Dimensions.get('window').width - 16,
                       paddingRight: 16,
-                      ...(Platform.OS === 'web' ? {
-                        paddingLeft: 32,
-                        paddingRight: 16,
-                        maxWidth: getContainerWidth() - 16,
-                      } : {}),
+                      ...(Platform.OS === 'web'
+                        ? {
+                            paddingLeft: 32,
+                            paddingRight: 16,
+                            maxWidth: getContainerWidth() - 16,
+                          }
+                        : {}),
                     }}
                   >
                     {day.lessons
@@ -946,43 +1083,89 @@ export default function ScheduleScreen() {
                               styles.lessonCard,
                               {
                                 marginBottom: 20,
-                                ...(Platform.OS === 'web' ? {
-                                  marginBottom: 16,
-                                } : {}),
+                                ...(Platform.OS === 'web'
+                                  ? {
+                                      marginBottom: 16,
+                                    }
+                                  : {}),
                               },
                               lessonIndex !== day.lessons.length - 1 && {
                                 borderBottomWidth: StyleSheet.hairlineWidth,
-                                borderColor: theme.borderColor
-                              }
+                                borderColor: theme.borderColor,
+                              },
                             ]}
                           >
-                            <ThemedView style={[styles.lessonTime, { justifyContent: lesson.timeRange ? 'space-between' : 'center' }]}>
+                            <ThemedView
+                              style={[
+                                styles.lessonTime,
+                                {
+                                  justifyContent: lesson.timeRange
+                                    ? 'space-between'
+                                    : 'center',
+                                },
+                              ]}
+                            >
                               {lesson.timeRange ? (
                                 <>
-                                  <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                                  <ThemedText
+                                    style={[
+                                      styles.timeText,
+                                      { color: theme.secondaryText },
+                                    ]}
+                                  >
                                     {lesson.timeRange.split('-')[0]}
                                   </ThemedText>
-                                  <ThemedText style={[styles.timeText, { color: theme.secondaryText }]}>
+                                  <ThemedText
+                                    style={[
+                                      styles.timeText,
+                                      { color: theme.secondaryText },
+                                    ]}
+                                  >
                                     {lesson.timeRange.split('-')[1]}
                                   </ThemedText>
                                 </>
                               ) : (
-                                <ThemedText style={[styles.infinitySymbol, { color: typeInfo.color }]}>
+                                <ThemedText
+                                  style={[
+                                    styles.infinitySymbol,
+                                    { color: typeInfo.color },
+                                  ]}
+                                >
                                   ∞
                                 </ThemedText>
                               )}
                             </ThemedView>
 
-                            <ThemedView style={[styles.lessonTypeLine, { backgroundColor: typeInfo.color }]} />
+                            <ThemedView
+                              style={[
+                                styles.lessonTypeLine,
+                                { backgroundColor: typeInfo.color },
+                              ]}
+                            />
 
                             <ThemedView style={styles.lessonInfo}>
-                              <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                              <ThemedText
+                                style={[
+                                  styles.lessonName,
+                                  { color: theme.textColor },
+                                ]}
+                              >
                                 {lesson.lessonName}
                               </ThemedText>
 
-                              <ThemedText style={[styles.lessonName, { color: theme.textColor }]}>
+                              <ThemedText
+                                style={[
+                                  styles.lessonName,
+                                  { color: theme.textColor },
+                                ]}
+                              >
                                 {typeInfo.label && (
-                                  <ThemedText style={[styles.lessonType, { color: typeInfo.color }]}>
+                                  <ThemedText
+                                    style={[
+                                      styles.lessonType,
+                                      { color: typeInfo.color },
+                                    ]}
+                                  >
                                     {typeInfo.label}
                                   </ThemedText>
                                 )}
@@ -991,8 +1174,14 @@ export default function ScheduleScreen() {
                               <ThemedView style={styles.lessonDetails}>
                                 {lesson.auditoryName && (
                                   <ThemedView style={styles.detailItem}>
-                                    <IconSymbol name="mappin.circle.fill" size={14} color={theme.secondaryText} />
-                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                    <IconSymbol
+                                      name="mappin.circle.fill"
+                                      size={14}
+                                      color={theme.secondaryText}
+                                    />
+                                    <ThemedText
+                                      style={{ color: theme.secondaryText }}
+                                    >
                                       {lesson.auditoryName}
                                     </ThemedText>
                                   </ThemedView>
@@ -1001,8 +1190,14 @@ export default function ScheduleScreen() {
                               <ThemedView style={styles.lessonDetails}>
                                 {lesson.teacherName && (
                                   <ThemedView style={styles.detailItem}>
-                                    <IconSymbol name="person.fill" size={14} color={theme.secondaryText} />
-                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                    <IconSymbol
+                                      name="person.fill"
+                                      size={14}
+                                      color={theme.secondaryText}
+                                    />
+                                    <ThemedText
+                                      style={{ color: theme.secondaryText }}
+                                    >
                                       {lesson.teacherName}
                                     </ThemedText>
                                   </ThemedView>
@@ -1011,8 +1206,14 @@ export default function ScheduleScreen() {
                               <ThemedView style={styles.lessonDetails}>
                                 {lesson.isDistant && (
                                   <ThemedView style={styles.detailItem}>
-                                    <IconSymbol name="video.fill" size={14} color={theme.secondaryText} />
-                                    <ThemedText style={{ color: theme.secondaryText }}>
+                                    <IconSymbol
+                                      name="video.fill"
+                                      size={14}
+                                      color={theme.secondaryText}
+                                    />
+                                    <ThemedText
+                                      style={{ color: theme.secondaryText }}
+                                    >
                                       Дистанционно
                                     </ThemedText>
                                   </ThemedView>
@@ -1043,10 +1244,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingBottom: -40,
-    ...(Platform.OS === 'web' ? {
-      height: '100vh',
-      minHeight: '100vh',
-    } as unknown as ViewStyle : {}),
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100vh',
+          minHeight: '100vh',
+        } as unknown as ViewStyle)
+      : {}),
   },
   container: {
     flex: 1,
@@ -1247,4 +1450,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-}); 
+});

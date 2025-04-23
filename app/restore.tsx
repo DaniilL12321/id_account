@@ -1,5 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, TouchableOpacity, View, ScrollView, Platform, ViewStyle, KeyboardAvoidingView, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  Platform,
+  ViewStyle,
+  KeyboardAvoidingView,
+  NativeSyntheticEvent,
+  TextInputKeyPressEventData,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
@@ -39,7 +49,9 @@ export default function RestoreScreen() {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
     errorColor: '#FF3B30',
@@ -88,13 +100,17 @@ export default function RestoreScreen() {
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
-      setError(error instanceof Error ? error.message : 'Введены некорректные данные');
+      setError(
+        error instanceof Error ? error.message : 'Введены некорректные данные',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+  const handleKeyPress = (
+    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+  ) => {
     if (e.nativeEvent.key === 'Enter' && !loading) {
       handleRestore();
     }
@@ -104,7 +120,9 @@ export default function RestoreScreen() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <Container>
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+        <SafeAreaView
+          style={[styles.safeArea, { backgroundColor: theme.background }]}
+        >
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
@@ -117,16 +135,25 @@ export default function RestoreScreen() {
             >
               <View style={styles.header}>
                 <TouchableOpacity onPress={handleBackPress}>
-                  <IconSymbol name="chevron.left" size={24} color={theme.textColor} />
+                  <IconSymbol
+                    name="chevron.left"
+                    size={24}
+                    color={theme.textColor}
+                  />
                 </TouchableOpacity>
                 <ThemedText style={[styles.title, { color: theme.textColor }]}>
                   Восстановление
                 </ThemedText>
               </View>
 
-              <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-                <ThemedText style={[styles.description, { color: theme.secondaryText }]}>
-                  Введите номер зачетной книжки или студенческого билета и номер паспорта (без серии) для восстановления учетных данных
+              <ThemedView
+                style={[styles.card, { backgroundColor: theme.cardBackground }]}
+              >
+                <ThemedText
+                  style={[styles.description, { color: theme.secondaryText }]}
+                >
+                  Введите номер зачетной книжки или студенческого билета и номер
+                  паспорта (без серии) для восстановления учетных данных
                 </ThemedText>
 
                 <ThemedTextInput
@@ -149,11 +176,15 @@ export default function RestoreScreen() {
                   keyboardType="number-pad"
                   autoCapitalize="none"
                   secureTextEntry
-                  onKeyPress={Platform.OS === 'web' ? handleKeyPress : undefined}
+                  onKeyPress={
+                    Platform.OS === 'web' ? handleKeyPress : undefined
+                  }
                 />
 
                 {error && (
-                  <ThemedText style={[styles.error, { color: theme.errorColor }]}>
+                  <ThemedText
+                    style={[styles.error, { color: theme.errorColor }]}
+                  >
                     {error}
                   </ThemedText>
                 )}
@@ -176,43 +207,71 @@ export default function RestoreScreen() {
               </ThemedView>
 
               {userData && (
-                <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
-                  <ThemedText style={[styles.subtitle, { color: theme.textColor }]}>
+                <ThemedView
+                  style={[
+                    styles.card,
+                    { backgroundColor: theme.cardBackground },
+                  ]}
+                >
+                  <ThemedText
+                    style={[styles.subtitle, { color: theme.textColor }]}
+                  >
                     Ваши учетные данные
                   </ThemedText>
 
                   <View style={styles.infoRow}>
-                    <ThemedText style={{ color: theme.secondaryText }}>ФИО:</ThemedText>
-                    <ThemedText style={{ color: theme.textColor }}>{userData.fullName}</ThemedText>
+                    <ThemedText style={{ color: theme.secondaryText }}>
+                      ФИО:
+                    </ThemedText>
+                    <ThemedText style={{ color: theme.textColor }}>
+                      {userData.fullName}
+                    </ThemedText>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <ThemedText style={{ color: theme.secondaryText }}>Логин:</ThemedText>
-                    <ThemedText style={{ color: theme.textColor }}>{userData.login}</ThemedText>
+                    <ThemedText style={{ color: theme.secondaryText }}>
+                      Логин:
+                    </ThemedText>
+                    <ThemedText style={{ color: theme.textColor }}>
+                      {userData.login}
+                    </ThemedText>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <ThemedText style={{ color: theme.secondaryText }}>Пароль:</ThemedText>
-                    <ThemedText style={{ color: theme.textColor }}>{userData.password}</ThemedText>
+                    <ThemedText style={{ color: theme.secondaryText }}>
+                      Пароль:
+                    </ThemedText>
+                    <ThemedText style={{ color: theme.textColor }}>
+                      {userData.password}
+                    </ThemedText>
                   </View>
 
                   <View style={styles.infoRow}>
-                    <ThemedText style={{ color: theme.secondaryText }}>Email:</ThemedText>
-                    <ThemedText style={{ color: theme.textColor }}>{userData.email}</ThemedText>
+                    <ThemedText style={{ color: theme.secondaryText }}>
+                      Email:
+                    </ThemedText>
+                    <ThemedText style={{ color: theme.textColor }}>
+                      {userData.email}
+                    </ThemedText>
                   </View>
 
                   <TouchableOpacity
                     style={[
                       styles.button,
-                      { backgroundColor: theme.accentColor, marginTop: 16 }
+                      { backgroundColor: theme.accentColor, marginTop: 16 },
                     ]}
                     onPress={async () => {
                       if (Platform.OS !== 'web') {
-                        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        await Haptics.impactAsync(
+                          Haptics.ImpactFeedbackStyle.Medium,
+                        );
                       }
                       router.replace({
                         pathname: '/auth',
-                        params: { login: userData.login, password: userData.password }
+                        params: {
+                          login: userData.login,
+                          password: userData.password,
+                        },
                       });
                     }}
                   >
@@ -233,10 +292,12 @@ export default function RestoreScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    ...(Platform.OS === 'web' ? {
-      height: '100vh',
-      minHeight: '100vh',
-    } as unknown as ViewStyle : {}),
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100vh',
+          minHeight: '100vh',
+        } as unknown as ViewStyle)
+      : {}),
   },
   scrollView: {
     flex: 1,

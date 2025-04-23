@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, Alert, View, Modal, Animated, PanResponder, ViewStyle, Platform, Linking } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  View,
+  Modal,
+  Animated,
+  PanResponder,
+  ViewStyle,
+  Platform,
+  Linking,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -39,7 +51,7 @@ function SettingsContent() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [logoutFadeAnim] = useState(new Animated.Value(0));
-  const buildDate = new Date("2025-03-17"); // TODO: надо бы нормально конечно сделать, но пока так 😂
+  const buildDate = new Date('2025-03-17'); // TODO: надо бы нормально конечно сделать, но пока так 😂
   const buildNumber = 4; // TODO: тут бы тоже 🙃
   const [modalVisible, setModalVisible] = useState(false);
   const panY = useRef(new Animated.Value(0)).current;
@@ -55,31 +67,35 @@ function SettingsContent() {
     useNativeDriver: true,
   });
 
-  const panResponder = useRef(PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, gestureState) => {
-      if (gestureState.dy > 0) {
-        panY.setValue(gestureState.dy);
-      }
-    },
-    onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dy > 50) {
-        closeAnim.start(() => {
-          hideModal();
-          panY.setValue(0);
-        });
-      } else {
-        resetPositionAnim.start();
-      }
-    },
-  })).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          panY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 50) {
+          closeAnim.start(() => {
+            hideModal();
+            panY.setValue(0);
+          });
+        } else {
+          resetPositionAnim.start();
+        }
+      },
+    }),
+  ).current;
 
   const theme = {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
   };
@@ -122,21 +138,17 @@ function SettingsContent() {
         useNativeDriver: true,
       }).start();
     } else {
-      Alert.alert(
-        'Выход',
-        'Вы уверены, что хотите выйти?',
-        [
-          {
-            text: 'Отмена',
-            style: 'cancel'
-          },
-          {
-            text: 'Выйти',
-            style: 'destructive',
-            onPress: performLogout
-          }
-        ]
-      );
+      Alert.alert('Выход', 'Вы уверены, что хотите выйти?', [
+        {
+          text: 'Отмена',
+          style: 'cancel',
+        },
+        {
+          text: 'Выйти',
+          style: 'destructive',
+          onPress: performLogout,
+        },
+      ]);
     }
   };
 
@@ -161,8 +173,8 @@ function SettingsContent() {
 
       const response = await fetch(`${OAUTH_URL}/logout`, {
         headers: {
-          'Authorization': `Bearer ${access_token}`
-        }
+          Authorization: `Bearer ${access_token}`,
+        },
       });
 
       await response.json();
@@ -174,7 +186,13 @@ function SettingsContent() {
     }
   };
 
-  const ThemeOption = ({ title, value }: { title: string; value: ThemeMode }) => (
+  const ThemeOption = ({
+    title,
+    value,
+  }: {
+    title: string;
+    value: ThemeMode;
+  }) => (
     <TouchableOpacity
       style={[styles.themeOption, themeMode === value && styles.selectedOption]}
       onPress={() => {
@@ -194,12 +212,14 @@ function SettingsContent() {
 
   return (
     <Container>
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <ScrollView
           style={[styles.scrollView, { backgroundColor: theme.background }]}
           contentContainerStyle={[
             styles.scrollContent,
-            { padding: 16, gap: 16, paddingBottom: 80 }
+            { padding: 16, gap: 16, paddingBottom: 80 },
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -209,89 +229,172 @@ function SettingsContent() {
             </ThemedText>
           </View>
 
-          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.cardBackground }]}
+          >
             <TouchableOpacity
               style={styles.settingsItem}
               onPress={() => setShowThemeModal(true)}
             >
-              <IconSymbol name="moon.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              <IconSymbol
+                name="moon.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.settingsItemText, { color: theme.textColor }]}
+              >
                 Тема
               </ThemedText>
               <ThemedText style={{ color: theme.secondaryText }}>
-                {themeMode === 'light' ? 'Светлая' : themeMode === 'dark' ? 'Тёмная' : 'Системная'}
+                {themeMode === 'light'
+                  ? 'Светлая'
+                  : themeMode === 'dark'
+                  ? 'Тёмная'
+                  : 'Системная'}
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
-              <IconSymbol name="gearshape.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+            <TouchableOpacity
+              style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol
+                name="gearshape.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.settingsItemText, { color: theme.textColor }]}
+              >
                 Расширенный режим
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
-              <IconSymbol name="bell.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+            <TouchableOpacity
+              style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
+              <IconSymbol
+                name="bell.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.settingsItemText, { color: theme.textColor }]}
+              >
                 Уведомления
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
           </ThemedView>
 
-          <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
-            <TouchableOpacity style={[styles.settingsItem, { opacity: 0.5 }]}
-              disabled={true}>
+          <ThemedView
+            style={[styles.section, { backgroundColor: theme.cardBackground }]}
+          >
+            <TouchableOpacity
+              style={[styles.settingsItem, { opacity: 0.5 }]}
+              disabled={true}
+            >
               <IconSymbol name="globe" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+              <ThemedText
+                style={[styles.settingsItemText, { color: theme.textColor }]}
+              >
                 Язык
               </ThemedText>
               <ThemedText style={{ color: theme.secondaryText }}>
                 Русский
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.settingsItem}
-              onPress={showModal}
-            >
-              <IconSymbol name="info.circle.fill" size={20} color={theme.accentColor} />
-              <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+            <TouchableOpacity style={styles.settingsItem} onPress={showModal}>
+              <IconSymbol
+                name="info.circle.fill"
+                size={20}
+                color={theme.accentColor}
+              />
+              <ThemedText
+                style={[styles.settingsItemText, { color: theme.textColor }]}
+              >
                 О приложении
               </ThemedText>
-              <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+              <IconSymbol
+                name="chevron.right"
+                size={16}
+                color={theme.secondaryText}
+              />
             </TouchableOpacity>
           </ThemedView>
 
           {Platform.OS === 'web' ? (
-            <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <ThemedView
+              style={[
+                styles.section,
+                { backgroundColor: theme.cardBackground },
+              ]}
+            >
               <TouchableOpacity
                 style={styles.settingsItem}
                 onPress={() => Linking.openURL(downloadUrl)}
               >
-                <IconSymbol name="arrow.down.circle" size={20} color={theme.accentColor} />
-                <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                <IconSymbol
+                  name="arrow.down.circle"
+                  size={20}
+                  color={theme.accentColor}
+                />
+                <ThemedText
+                  style={[styles.settingsItemText, { color: theme.textColor }]}
+                >
                   Скачать приложение
                 </ThemedText>
-                <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+                <IconSymbol
+                  name="chevron.right"
+                  size={16}
+                  color={theme.secondaryText}
+                />
               </TouchableOpacity>
             </ThemedView>
           ) : (
-            <ThemedView style={[styles.section, { backgroundColor: theme.cardBackground }]}>
+            <ThemedView
+              style={[
+                styles.section,
+                { backgroundColor: theme.cardBackground },
+              ]}
+            >
               <TouchableOpacity
                 style={styles.settingsItem}
                 onPress={() => Linking.openURL(webAppUrl)}
               >
                 <IconSymbol name="globe" size={20} color={theme.accentColor} />
-                <ThemedText style={[styles.settingsItemText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.settingsItemText, { color: theme.textColor }]}
+                >
                   Открыть веб-версию
                 </ThemedText>
-                <IconSymbol name="chevron.right" size={16} color={theme.secondaryText} />
+                <IconSymbol
+                  name="chevron.right"
+                  size={16}
+                  color={theme.secondaryText}
+                />
               </TouchableOpacity>
             </ThemedView>
           )}
@@ -318,16 +421,20 @@ function SettingsContent() {
           activeOpacity={1}
           onPress={() => setShowThemeModal(false)}
         >
-          <View style={[
-            styles.modalContent,
-            {
-              backgroundColor: theme.cardBackground,
-              ...(Platform.OS === 'web' ? {
-                maxWidth: 400,
-                marginHorizontal: 'auto',
-              } : {})
-            }
-          ]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: theme.cardBackground,
+                ...(Platform.OS === 'web'
+                  ? {
+                      maxWidth: 400,
+                      marginHorizontal: 'auto',
+                    }
+                  : {}),
+              },
+            ]}
+          >
             <ThemeOption title="Светлая" value="light" />
             <ThemeOption title="Тёмная" value="dark" />
             <ThemeOption title="Системная" value="system" />
@@ -344,11 +451,13 @@ function SettingsContent() {
         <Animated.View
           style={[
             styles.modalContainer,
-            Platform.OS === 'web' ? {
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: fadeAnim,
-            } : {}
+            Platform.OS === 'web'
+              ? {
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: fadeAnim,
+                }
+              : {},
           ]}
         >
           <TouchableOpacity
@@ -361,33 +470,38 @@ function SettingsContent() {
                 styles.infoModalContent,
                 {
                   backgroundColor: theme.cardBackground,
-                  transform: Platform.OS === 'web'
-                    ? [{
-                      scale: fadeAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.95, 1],
-                      }),
-                    }]
-                    : [
-                      {
-                        translateY: Animated.add(
-                          fadeAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [300, 0],
-                          }),
-                          panY
-                        ),
-                      },
-                    ],
-                  ...(Platform.OS === 'web' ? {
-                    position: 'relative',
-                    maxWidth: 600,
-                    width: '100%',
-                    marginHorizontal: 'auto',
-                    borderRadius: 16,
-                    bottom: 'auto',
-                  } : {})
-                }
+                  transform:
+                    Platform.OS === 'web'
+                      ? [
+                          {
+                            scale: fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.95, 1],
+                            }),
+                          },
+                        ]
+                      : [
+                          {
+                            translateY: Animated.add(
+                              fadeAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [300, 0],
+                              }),
+                              panY,
+                            ),
+                          },
+                        ],
+                  ...(Platform.OS === 'web'
+                    ? {
+                        position: 'relative',
+                        maxWidth: 600,
+                        width: '100%',
+                        marginHorizontal: 'auto',
+                        borderRadius: 16,
+                        bottom: 'auto',
+                      }
+                    : {}),
+                },
               ]}
               {...(Platform.OS !== 'web' ? panResponder.panHandlers : {})}
               onStartShouldSetResponder={() => true}
@@ -395,40 +509,66 @@ function SettingsContent() {
             >
               {Platform.OS !== 'web' && <View style={styles.dragIndicator} />}
               <View style={styles.infoModalHeader}>
-                <ThemedText style={[styles.infoModalTitle, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.infoModalTitle, { color: theme.textColor }]}
+                >
                   О приложении
                 </ThemedText>
                 <TouchableOpacity onPress={hideModal}>
-                  <IconSymbol name="xmark" size={20} color={theme.secondaryText} />
+                  <IconSymbol
+                    name="xmark"
+                    size={20}
+                    color={theme.secondaryText}
+                  />
                 </TouchableOpacity>
               </View>
 
               <View style={styles.infoContent}>
                 <View style={styles.infoRow}>
-                  <ThemedText style={{ color: theme.secondaryText }}>Название</ThemedText>
-                  <ThemedText style={{ color: theme.textColor }}>ЯГТУ ID</ThemedText>
+                  <ThemedText style={{ color: theme.secondaryText }}>
+                    Название
+                  </ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>
+                    ЯГТУ ID
+                  </ThemedText>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <ThemedText style={{ color: theme.secondaryText }}>Версия</ThemedText>
-                  <ThemedText style={{ color: theme.textColor }}>0.0.1</ThemedText>
+                  <ThemedText style={{ color: theme.secondaryText }}>
+                    Версия
+                  </ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>
+                    0.0.1
+                  </ThemedText>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <ThemedText style={{ color: theme.secondaryText }}>Сборка</ThemedText>
-                  <ThemedText style={{ color: theme.textColor }}>{buildNumber}</ThemedText>
+                  <ThemedText style={{ color: theme.secondaryText }}>
+                    Сборка
+                  </ThemedText>
+                  <ThemedText style={{ color: theme.textColor }}>
+                    {buildNumber}
+                  </ThemedText>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <ThemedText style={{ color: theme.secondaryText }}>Дата сборки</ThemedText>
+                  <ThemedText style={{ color: theme.secondaryText }}>
+                    Дата сборки
+                  </ThemedText>
                   <ThemedText style={{ color: theme.textColor }}>
                     {buildDate.toLocaleDateString('ru-RU')}
                   </ThemedText>
                 </View>
 
                 <View style={[styles.infoRow, { alignItems: 'flex-start' }]}>
-                  <ThemedText style={{ color: theme.secondaryText }}>Описание</ThemedText>
-                  <ThemedText style={[{ color: theme.textColor, flex: 1, textAlign: 'right' }]}>
+                  <ThemedText style={{ color: theme.secondaryText }}>
+                    Описание
+                  </ThemedText>
+                  <ThemedText
+                    style={[
+                      { color: theme.textColor, flex: 1, textAlign: 'right' },
+                    ]}
+                  >
                     Мобильное приложение для студентов ЯГТУ
                   </ThemedText>
                 </View>
@@ -447,11 +587,13 @@ function SettingsContent() {
         <Animated.View
           style={[
             styles.modalContainer,
-            Platform.OS === 'web' ? {
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: logoutFadeAnim,
-            } : {}
+            Platform.OS === 'web'
+              ? {
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: logoutFadeAnim,
+                }
+              : {},
           ]}
         >
           <TouchableOpacity
@@ -464,48 +606,68 @@ function SettingsContent() {
                 styles.logoutModalContent,
                 {
                   backgroundColor: theme.cardBackground,
-                  transform: Platform.OS === 'web'
-                    ? [{
-                      scale: logoutFadeAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.95, 1],
-                      }),
-                    }]
-                    : []
-                }
+                  transform:
+                    Platform.OS === 'web'
+                      ? [
+                          {
+                            scale: logoutFadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.95, 1],
+                            }),
+                          },
+                        ]
+                      : [],
+                },
               ]}
               onStartShouldSetResponder={() => true}
               onTouchEnd={(e) => e.stopPropagation()}
             >
               <View style={styles.logoutModalHeader}>
-                <ThemedText style={[styles.logoutModalTitle, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.logoutModalTitle, { color: theme.textColor }]}
+                >
                   Выход
                 </ThemedText>
               </View>
 
               <View style={styles.logoutModalBody}>
-                <ThemedText style={[styles.logoutModalText, { color: theme.textColor }]}>
+                <ThemedText
+                  style={[styles.logoutModalText, { color: theme.textColor }]}
+                >
                   Вы уверены, что хотите выйти?
                 </ThemedText>
               </View>
 
               <View style={styles.logoutModalActions}>
                 <TouchableOpacity
-                  style={[styles.logoutModalButton, { backgroundColor: theme.cardBackground }]}
+                  style={[
+                    styles.logoutModalButton,
+                    { backgroundColor: theme.cardBackground },
+                  ]}
                   onPress={hideLogoutModal}
                 >
-                  <ThemedText style={[styles.logoutModalButtonText, { color: theme.textColor }]}>
+                  <ThemedText
+                    style={[
+                      styles.logoutModalButtonText,
+                      { color: theme.textColor },
+                    ]}
+                  >
                     Отмена
                   </ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.logoutModalButton, styles.logoutModalButtonDanger]}
+                  style={[
+                    styles.logoutModalButton,
+                    styles.logoutModalButtonDanger,
+                  ]}
                   onPress={() => {
                     hideLogoutModal();
                     performLogout();
                   }}
                 >
-                  <ThemedText style={[styles.logoutModalButtonText, { color: '#FFFFFF' }]}>
+                  <ThemedText
+                    style={[styles.logoutModalButtonText, { color: '#FFFFFF' }]}
+                  >
                     Выйти
                   </ThemedText>
                 </TouchableOpacity>
@@ -714,4 +876,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

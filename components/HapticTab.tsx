@@ -10,8 +10,8 @@ export function HapticTab(props: BottomTabBarButtonProps) {
       style={[
         props.style,
         Platform.select({
-          web: styles.webTab
-        })
+          web: styles.webTab,
+        }),
       ]}
       onPressIn={(ev) => {
         if (Platform.OS === 'ios') {

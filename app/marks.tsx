@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, View, ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Platform,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack } from 'expo-router';
@@ -14,7 +22,7 @@ import Animated, {
   withSequence,
   withTiming,
   useSharedValue,
-  withDelay
+  withDelay,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
@@ -48,14 +56,11 @@ const SkeletonLoader = ({ style }: { style: ViewStyle }) => {
   React.useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withDelay(
-          Math.random() * 500,
-          withTiming(0.7, { duration: 1000 })
-        ),
-        withTiming(0.3, { duration: 1000 })
+        withDelay(Math.random() * 500, withTiming(0.7, { duration: 1000 })),
+        withTiming(0.3, { duration: 1000 }),
       ),
       -1,
-      true
+      true,
     );
   }, []);
 
@@ -80,12 +85,14 @@ const MarksScreenSkeleton = ({ theme }: { theme: any }) => {
       style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={[
         styles.content,
-        Platform.OS === 'web' ? {
-          maxWidth: 768,
-          width: '100%',
-          marginHorizontal: 'auto',
-          paddingTop: 40,
-        } as ViewStyle : {}
+        Platform.OS === 'web'
+          ? ({
+              maxWidth: 768,
+              width: '100%',
+              marginHorizontal: 'auto',
+              paddingTop: 40,
+            } as ViewStyle)
+          : {},
       ]}
       showsVerticalScrollIndicator={false}
     >
@@ -94,7 +101,9 @@ const MarksScreenSkeleton = ({ theme }: { theme: any }) => {
         <SkeletonLoader style={{ width: 150, height: 28, borderRadius: 8 }} />
       </View>
 
-      <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+      <ThemedView
+        style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      >
         <ThemedView style={styles.cardHeader}>
           <SkeletonLoader style={{ width: 200, height: 20, borderRadius: 8 }} />
           <SkeletonLoader style={{ width: 40, height: 28, borderRadius: 8 }} />
@@ -114,7 +123,7 @@ const MarksScreenSkeleton = ({ theme }: { theme: any }) => {
               width: 100,
               height: 36,
               borderRadius: 20,
-              marginHorizontal: 4
+              marginHorizontal: 4,
             }}
           />
         ))}
@@ -127,10 +136,21 @@ const MarksScreenSkeleton = ({ theme }: { theme: any }) => {
             style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
           >
             <View style={styles.markInfo}>
-              <SkeletonLoader style={{ width: '80%', height: 20, borderRadius: 8 }} />
-              <SkeletonLoader style={{ width: '60%', height: 16, borderRadius: 8, marginTop: 4 }} />
+              <SkeletonLoader
+                style={{ width: '80%', height: 20, borderRadius: 8 }}
+              />
+              <SkeletonLoader
+                style={{
+                  width: '60%',
+                  height: 16,
+                  borderRadius: 8,
+                  marginTop: 4,
+                }}
+              />
             </View>
-            <SkeletonLoader style={{ width: 32, height: 32, borderRadius: 16 }} />
+            <SkeletonLoader
+              style={{ width: 32, height: 32, borderRadius: 16 }}
+            />
           </ThemedView>
         ))}
       </View>
@@ -150,7 +170,9 @@ function MarksContent() {
     background: isDarkMode ? '#000000' : '#F2F3F7',
     cardBackground: isDarkMode ? '#1D1D1D' : '#FFFFFF',
     textColor: isDarkMode ? '#FFFFFF' : '#000000',
-    secondaryText: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    secondaryText: isDarkMode
+      ? 'rgba(255, 255, 255, 0.6)'
+      : 'rgba(0, 0, 0, 0.6)',
     borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
     accentColor: '#2688EB',
     green: '#34C759',
@@ -175,7 +197,7 @@ function MarksContent() {
       const { access_token } = JSON.parse(tokens);
       const response = await fetch(`${API_URL}/s/general/v1/mark/my`, {
         headers: {
-          'Authorization': `Bearer ${access_token}`,
+          Authorization: `Bearer ${access_token}`,
         },
       });
 
@@ -186,7 +208,9 @@ function MarksContent() {
       const data: Mark[] = await response.json();
       setMarks(data);
 
-      const uniqueSemesters = [...new Set(data.map(mark => mark.semester))].sort((a, b) => b - a);
+      const uniqueSemesters = [
+        ...new Set(data.map((mark) => mark.semester)),
+      ].sort((a, b) => b - a);
       setSemesters(uniqueSemesters);
       setSelectedSemester(uniqueSemesters[0] || 1);
     } catch (err) {
@@ -198,8 +222,8 @@ function MarksContent() {
 
   const calculateAverageGrade = (allMarks: Mark[]) => {
     const numericMarks = allMarks
-      .filter(mark => mark.mark > 0)
-      .map(mark => mark.mark);
+      .filter((mark) => mark.mark > 0)
+      .map((mark) => mark.mark);
 
     if (numericMarks.length === 0) return '-';
 
@@ -225,7 +249,7 @@ function MarksContent() {
   };
 
   const filteredMarks = marks
-    .filter(mark => mark.semester === selectedSemester)
+    .filter((mark) => mark.semester === selectedSemester)
     .sort((a, b) => {
       if (a.markName === null && b.markName !== null) return -1;
       if (a.markName !== null && b.markName === null) return 1;
@@ -251,7 +275,9 @@ function MarksContent() {
   const handleMarkPress = async (mark: Mark) => {
     if (Platform.OS !== 'web') {
       if (mark.mark === 5) {
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Success,
+        );
       } else if (mark.mark === 2) {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       } else if (mark.mark === 0) {
@@ -264,7 +290,9 @@ function MarksContent() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: theme.background }]}
+      >
         <MarksScreenSkeleton theme={theme} />
       </SafeAreaView>
     );
@@ -272,7 +300,9 @@ function MarksContent() {
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: theme.background }]}
+      >
         <ThemedView style={styles.errorContainer}>
           <ThemedText style={styles.error}>{error}</ThemedText>
         </ThemedView>
@@ -281,17 +311,21 @@ function MarksContent() {
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}
+    >
       <ScrollView
         style={[styles.container, { backgroundColor: theme.background }]}
         contentContainerStyle={[
           styles.content,
-          Platform.OS === 'web' ? {
-            maxWidth: 768,
-            width: '100%',
-            marginHorizontal: 'auto',
-            paddingTop: 40,
-          } as ViewStyle : {}
+          Platform.OS === 'web'
+            ? ({
+                maxWidth: 768,
+                width: '100%',
+                marginHorizontal: 'auto',
+                paddingTop: 40,
+              } as ViewStyle)
+            : {},
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -304,12 +338,16 @@ function MarksContent() {
           </ThemedText>
         </View>
 
-        <ThemedView style={[styles.card, { backgroundColor: theme.cardBackground }]}>
+        <ThemedView
+          style={[styles.card, { backgroundColor: theme.cardBackground }]}
+        >
           <ThemedView style={styles.cardHeader}>
             <ThemedText style={[styles.cardTitle, { color: theme.textColor }]}>
               Средний балл за все время
             </ThemedText>
-            <ThemedText style={[styles.averageGrade, { color: theme.textColor }]}>
+            <ThemedText
+              style={[styles.averageGrade, { color: theme.textColor }]}
+            >
               {averageGrade}
             </ThemedText>
           </ThemedView>
@@ -321,13 +359,16 @@ function MarksContent() {
           style={styles.semesterScroll}
           contentContainerStyle={styles.semesterContainer}
         >
-          {semesters.map(semester => (
+          {semesters.map((semester) => (
             <TouchableOpacity
               key={semester}
               style={[
                 styles.semesterButton,
                 {
-                  backgroundColor: selectedSemester === semester ? theme.accentColor : theme.cardBackground,
+                  backgroundColor:
+                    selectedSemester === semester
+                      ? theme.accentColor
+                      : theme.cardBackground,
                 },
               ]}
               onPress={() => handleSemesterChange(semester)}
@@ -335,7 +376,12 @@ function MarksContent() {
               <ThemedText
                 style={[
                   styles.semesterText,
-                  { color: selectedSemester === semester ? '#FFFFFF' : theme.textColor },
+                  {
+                    color:
+                      selectedSemester === semester
+                        ? '#FFFFFF'
+                        : theme.textColor,
+                  },
                 ]}
               >
                 {semester} семестр
@@ -346,25 +392,29 @@ function MarksContent() {
 
         <View style={styles.marksList}>
           {filteredMarks.map((mark, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => handleMarkPress(mark)}
-            >
+            <TouchableOpacity key={index} onPress={() => handleMarkPress(mark)}>
               <ThemedView
-                style={[styles.markCard, { backgroundColor: theme.cardBackground }]}
+                style={[
+                  styles.markCard,
+                  { backgroundColor: theme.cardBackground },
+                ]}
               >
                 <View style={styles.markInfo}>
-                  <ThemedText style={[styles.disciplineName, { color: theme.textColor }]}>
+                  <ThemedText
+                    style={[styles.disciplineName, { color: theme.textColor }]}
+                  >
                     {mark.lessonName}
                   </ThemedText>
-                  <ThemedText style={[styles.markType, { color: theme.secondaryText }]}>
+                  <ThemedText
+                    style={[styles.markType, { color: theme.secondaryText }]}
+                  >
                     {mark.controlTypeName}
                   </ThemedText>
                 </View>
                 <View
                   style={[
                     styles.markBadge,
-                    { backgroundColor: getMarkColor(mark) }
+                    { backgroundColor: getMarkColor(mark) },
                   ]}
                 >
                   <ThemedText style={styles.markValue}>
@@ -384,10 +434,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     paddingBottom: -40,
-    ...(Platform.OS === 'web' ? {
-      height: '100vh',
-      minHeight: '100vh',
-    } as unknown as ViewStyle : {}),
+    ...(Platform.OS === 'web'
+      ? ({
+          height: '100vh',
+          minHeight: '100vh',
+        } as unknown as ViewStyle)
+      : {}),
   },
   container: {
     flex: 1,
@@ -517,4 +569,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-}); 
+});
