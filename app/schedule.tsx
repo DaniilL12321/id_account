@@ -669,7 +669,7 @@ export default function ScheduleScreen() {
     minWidth:
       Platform.OS === 'web'
         ? (containerWidth - 32 - 32 - 40) / 7
-        : (Dimensions.get('window').width - 32 - 32 - 40) / 5,
+        : (Dimensions.get('window').width - 32 - 32 - 40) / 6,
   });
 
   const getSkeletonDayStyle = () => ({
