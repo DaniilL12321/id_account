@@ -1,5 +1,10 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
+const OAUTH_URL = process.env.OAUTH_URL;
+const API_URL = process.env.API_URL;
+const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID;
+const OAUTH_SCOPE = process.env.OAUTH_SCOPE;
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'ЯГТУ ID',
@@ -11,27 +16,27 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
   },
   assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: 'ru.ystu.id'
+    bundleIdentifier: 'ru.ystu.id',
   },
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
     },
-    package: 'ru.ystu.id'
+    package: 'ru.ystu.id',
   },
   extra: {
-    OAUTH_URL: process.env.OAUTH_URL,
-    API_URL: process.env.API_URL,
-    OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID,
-    OAUTH_SCOPE: process.env.OAUTH_SCOPE,
+    OAUTH_URL,
+    API_URL,
+    OAUTH_CLIENT_ID,
+    OAUTH_SCOPE,
     eas: {
-        projectId: "2c23029f-1ccc-4c9a-aaa8-3ef8c7c83d32"
-      }
+      projectId: '2c23029f-1ccc-4c9a-aaa8-3ef8c7c83d32',
+    },
   },
-}); 
+});
