@@ -51,6 +51,7 @@ function SettingsContent() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [logoutFadeAnim] = useState(new Animated.Value(0));
+  const version = '0.0.2';
   const buildDate = new Date('2025-05-02'); // TODO: надо бы нормально конечно сделать, но пока так 😂
   const buildNumber = 5; // TODO: тут бы тоже 🙃
   const [modalVisible, setModalVisible] = useState(false);
@@ -538,7 +539,7 @@ function SettingsContent() {
                     Версия
                   </ThemedText>
                   <ThemedText style={{ color: theme.textColor }}>
-                    0.0.1
+                    {version}
                   </ThemedText>
                 </View>
 
