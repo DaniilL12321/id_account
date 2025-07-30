@@ -349,6 +349,7 @@ export default function HomeScreen() {
   const [schedule, setSchedule] = useState<Record<DayOffset, Lesson[]>>(
     {} as Record<DayOffset, Lesson[]>,
   );
+  const [upcomingExams, setUpcomingExams] = useState<Lesson[]>([]);
   const [selectedDay, setSelectedDay] = useState<DayOffset>(0);
   const [stats, setStats] = useState({
     averageGrade: 0,
@@ -444,6 +445,16 @@ export default function HomeScreen() {
         DayOffset,
         Lesson[]
       >;
+
+      const allExams = days
+        .flatMap((day) => day.lessons)
+        .filter((lesson) => lesson.type === 256)
+        .sort((a, b) => {
+          if (!a.startAt || !b.startAt) return 0;
+          return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
+        });
+
+      setUpcomingExams(allExams);
 
       const now = new Date();
       now.setHours(now.getHours());
@@ -690,6 +701,176 @@ export default function HomeScreen() {
           <ThemedText style={[styles.dateText, { color: theme.secondaryText }]}>
             {formatDate(currentTime)}
           </ThemedText>
+
+          {upcomingExams.length > 0 && (
+            <ThemedView style={styles.examTimelineContainer}>
+              <ThemedView style={styles.examTimelineHeader}>
+                <ThemedView style={styles.examTimelineTitleContainer}>
+                  <IconSymbol
+                    name="flame.fill"
+                    size={20}
+                    color={theme.accentColor}
+                  />
+                  <ThemedText
+                    style={[
+                      styles.examTimelineTitle,
+                      { color: theme.textColor },
+                    ]}
+                  >
+                    Сессия
+                  </ThemedText>
+                </ThemedView>
+                <ThemedText
+                  style={[
+                    styles.examTimelineSubtitle,
+                    { color: theme.secondaryText },
+                  ]}
+                >
+                  {upcomingExams.length}{' '}
+                  {upcomingExams.length === 1
+                    ? 'экзамен'
+                    : upcomingExams.length < 5
+                    ? 'экзамена'
+                    : 'экзаменов'}
+                </ThemedText>
+              </ThemedView>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.examTimelineScroll}
+              >
+                {upcomingExams.map((exam, index) => {
+                  const examDate = exam.startAt
+                    ? new Date(exam.startAt)
+                    : new Date();
+                  const daysLeft = Math.ceil(
+                    (examDate.getTime() - new Date().getTime()) /
+                      (1000 * 60 * 60 * 24),
+                  );
+                  const isToday = daysLeft === 0;
+                  const isTomorrow = daysLeft === 1;
+                  const isPassed = daysLeft < 0;
+
+                  const progress = Math.max(
+                    0,
+                    Math.min(1, index / (upcomingExams.length - 1)),
+                  );
+                  const hue = 200 + progress * 160;
+                  const color = `hsl(${hue}, 85%, ${isDarkMode ? 65 : 55}%)`;
+
+                  return (
+                    <ThemedView
+                      key={index}
+                      style={[
+                        styles.examTimelineCard,
+                        {
+                          backgroundColor: theme.cardBackground,
+                          borderColor: color,
+                          borderWidth: isToday ? 2 : 0,
+                          marginBottom: 16,
+                          opacity: isPassed ? 0.5 : 1,
+                        },
+                      ]}
+                    >
+                      <ThemedView style={styles.examTimelineCardHeader}>
+                        <ThemedView
+                          style={[
+                            styles.examTimelineBadge,
+                            { backgroundColor: `${color}20` },
+                          ]}
+                        >
+                          <ThemedText
+                            style={[
+                              styles.examTimelineDays,
+                              { color: theme.textColor },
+                            ]}
+                          >
+                            {isPassed
+                              ? 'Прошел'
+                              : isToday
+                              ? 'Сегодня'
+                              : isTomorrow
+                              ? 'Завтра'
+                              : `${daysLeft} дн.`}
+                          </ThemedText>
+                        </ThemedView>
+                        <IconSymbol
+                          name={
+                            isPassed
+                              ? 'checkmark.circle.fill'
+                              : isToday
+                              ? 'exclamationmark.circle.fill'
+                              : 'calendar'
+                          }
+                          size={20}
+                          color={color}
+                        />
+                      </ThemedView>
+
+                      <ThemedText
+                        style={[
+                          styles.examTimelineName,
+                          { color: theme.textColor },
+                        ]}
+                        numberOfLines={2}
+                      >
+                        {exam.lessonName}
+                      </ThemedText>
+
+                      <ThemedView style={styles.examTimelineDetails}>
+                        {exam.auditoryName && (
+                          <ThemedView style={styles.examTimelineDetail}>
+                            <IconSymbol
+                              name="mappin.circle.fill"
+                              size={16}
+                              color={color}
+                            />
+                            <ThemedText
+                              style={[
+                                styles.examTimelineDetailText,
+                                { color: theme.secondaryText },
+                              ]}
+                            >
+                              {exam.auditoryName}
+                            </ThemedText>
+                          </ThemedView>
+                        )}
+                        <ThemedText
+                          style={[
+                            styles.examTimelineDate,
+                            { color: theme.secondaryText },
+                          ]}
+                        >
+                          {examDate.toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                          })}
+                        </ThemedText>
+                      </ThemedView>
+
+                      <ThemedView
+                        style={[
+                          styles.examTimelineProgress,
+                          { backgroundColor: `${color}20` },
+                        ]}
+                      >
+                        <Animated.View
+                          style={[
+                            styles.examTimelineProgressBar,
+                            {
+                              backgroundColor: color,
+                              width: isPassed ? '100%' : '100%',
+                            },
+                          ]}
+                        />
+                      </ThemedView>
+                    </ThemedView>
+                  );
+                })}
+              </ScrollView>
+            </ThemedView>
+          )}
 
           <ThemedView
             style={[styles.card, { backgroundColor: theme.cardBackground }]}
@@ -1345,5 +1526,102 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     marginBottom: 2,
+  },
+  examTimelineContainer: {
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  examTimelineHeader: {
+    marginTop: 16,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  examTimelineTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  examTimelineTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  examTimelineSubtitle: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  examTimelineScroll: {
+    paddingHorizontal: 16,
+    gap: 12,
+    paddingBottom: 4,
+  },
+  examTimelineCard: {
+    width: 270,
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  examTimelineCardHeader: {
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  examTimelineBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  examTimelineDays: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  examTimelineName: {
+    fontSize: 17,
+    fontWeight: '600',
+    minHeight: 44,
+  },
+  examTimelineDetails: {
+    backgroundColor: 'transparent',
+    gap: 8,
+  },
+  examTimelineDetail: {
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  examTimelineDetailText: {
+    fontSize: 13,
+  },
+  examTimelineDate: {
+    fontSize: 13,
+  },
+  examTimelineProgress: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  examTimelineProgressBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: '100%',
+    borderRadius: 2,
   },
 });
