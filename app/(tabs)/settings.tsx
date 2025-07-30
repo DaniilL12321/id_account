@@ -52,7 +52,9 @@ function SettingsContent() {
   const [fadeAnim] = useState(new Animated.Value(0));
   const [logoutFadeAnim] = useState(new Animated.Value(0));
   const version = '0.0.2';
-  const buildDate = new Date('2025-05-02'); // TODO: надо бы нормально конечно сделать, но пока так 😂
+  const buildDate = new Date(
+    Constants.expoConfig?.extra?.BUILD_DATE || new Date().toISOString(),
+  );
   const buildNumber = 5; // TODO: тут бы тоже 🙃
   const [modalVisible, setModalVisible] = useState(false);
   const panY = useRef(new Animated.Value(0)).current;

@@ -7,6 +7,12 @@ on:
 jobs:
     update:
         runs-on: ubuntu-latest
+        env:
+            OAUTH_URL: ${{ secrets.OAUTH_URL }}
+            API_URL: ${{ secrets.API_URL }}
+            OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+            OAUTH_SCOPE: ${{ secrets.OAUTH_SCOPE }}
+            BUILD_DATE: ${{ github.event.head_commit.timestamp }}
         steps:
             - name: 🏗 Setup repo
               uses: actions/checkout@v3

@@ -4,6 +4,7 @@ const OAUTH_URL = process.env.OAUTH_URL;
 const API_URL = process.env.API_URL;
 const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID;
 const OAUTH_SCOPE = process.env.OAUTH_SCOPE;
+const BUILD_DATE = process.env.BUILD_DATE;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -35,6 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     API_URL,
     OAUTH_CLIENT_ID,
     OAUTH_SCOPE,
+    BUILD_DATE,
     eas: {
       projectId: '2c23029f-1ccc-4c9a-aaa8-3ef8c7c83d32',
     },
