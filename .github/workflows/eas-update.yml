@@ -32,5 +32,5 @@ jobs:
             - name: 📦 Build web
               run: npx expo export -p web
 
-            - name: 📤 Publish to Expo hosting
-              run: npx expo publish --platform web --non-interactive
+            - name: 🚀 Deploy to production
+              run: eas deploy --prod
