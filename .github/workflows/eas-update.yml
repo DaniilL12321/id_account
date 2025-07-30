@@ -29,5 +29,8 @@ jobs:
             - name: 🚀 Create update
               run: eas update --auto --non-interactive
 
-            - name: 🌐 Deploy web to Expo hosting
+            - name: 📦 Build web
               run: npx expo export -p web
+
+            - name: 📤 Publish to Expo hosting
+              run: npx expo publish --platform web --non-interactive
