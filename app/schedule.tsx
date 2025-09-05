@@ -165,20 +165,15 @@ const setCachedSchedule = async (data: ScheduleDay[]) => {
 };
 
 const isCurrentSemester = (date: Date) => {
-  const month = date.getMonth() + 1;
   const now = getMskDate();
+  const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
-
-  // TODO: такой вот пока костыль, мб потом пофиксить
-  // весенний семестр: январь-август
-  const isSpring = month >= 1 && month <= 8;
-  const currentSpring = currentMonth >= 1 && currentMonth <= 8;
-
-  // осенний семестр: сентябрь-декабрь
-  const isFall = month >= 9 && month <= 12;
-  const currentFall = currentMonth >= 9 && currentMonth <= 12;
-
-  return (isSpring && currentSpring) || (isFall && currentFall);
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  if (currentMonth >= 9 && currentMonth <= 12) {
+    return year === currentYear && month >= 9 && month <= 12;
+  }
+  return year === currentYear && month >= 1 && month <= 8;
 };
 
 export default function ScheduleScreen() {
