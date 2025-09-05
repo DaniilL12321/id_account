@@ -8,9 +8,7 @@ interface ContainerProps extends ViewProps {
 export function Container({ children, style, ...props }: ContainerProps) {
   return (
     <View style={[styles.container, style]} {...props}>
-      <View style={styles.content}>
-        {children}
-      </View>
+      <View style={styles.content}>{children}</View>
     </View>
   );
 }
@@ -24,8 +22,8 @@ const styles = StyleSheet.create({
       web: {
         overflow: 'auto',
         height: '100vh',
-      }
-    })
+      },
+    }),
   },
   content: {
     width: '100%',
@@ -35,7 +33,7 @@ const styles = StyleSheet.create({
       web: {
         paddingHorizontal: 16,
         paddingBottom: 50,
-      }
-    })
+      },
+    }),
   },
-}); 
+});

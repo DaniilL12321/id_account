@@ -31,8 +31,8 @@ export default function TabLayout() {
                     ? '#000000'
                     : '#FFFFFF'
                   : themeMode === 'dark'
-                  ? '#000000'
-                  : '#FFFFFF',
+                    ? '#000000'
+                    : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,
@@ -53,8 +53,8 @@ export default function TabLayout() {
                     ? '#000000'
                     : '#FFFFFF'
                   : themeMode === 'dark'
-                  ? '#000000'
-                  : '#FFFFFF',
+                    ? '#000000'
+                    : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,
@@ -67,8 +67,8 @@ export default function TabLayout() {
                     ? '#000000'
                     : '#FFFFFF'
                   : themeMode === 'dark'
-                  ? '#000000'
-                  : '#FFFFFF',
+                    ? '#000000'
+                    : '#FFFFFF',
               borderTopWidth: 0,
               elevation: 0,
               shadowOpacity: 0,

@@ -13,8 +13,12 @@ export const ThemedTextInput = forwardRef<TextInput, ThemedTextInputProps>(
     const theme = {
       background: isDarkMode ? '#1D1D1D' : '#FFFFFF',
       textColor: isDarkMode ? '#FFFFFF' : '#000000',
-      placeholderColor: isDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-      borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+      placeholderColor: isDarkMode
+        ? 'rgba(255, 255, 255, 0.6)'
+        : 'rgba(0, 0, 0, 0.6)',
+      borderColor: isDarkMode
+        ? 'rgba(255, 255, 255, 0.1)'
+        : 'rgba(0, 0, 0, 0.1)',
     };
 
     return (
@@ -34,7 +38,7 @@ export const ThemedTextInput = forwardRef<TextInput, ThemedTextInputProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

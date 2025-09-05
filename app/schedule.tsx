@@ -552,8 +552,8 @@ export default function ScheduleScreen() {
         scrollVelocity > 2
           ? Haptics.ImpactFeedbackStyle.Heavy
           : scrollVelocity > 1
-          ? Haptics.ImpactFeedbackStyle.Medium
-          : Haptics.ImpactFeedbackStyle.Light;
+            ? Haptics.ImpactFeedbackStyle.Medium
+            : Haptics.ImpactFeedbackStyle.Light;
 
       await Haptics.impactAsync(feedbackStyle);
     }

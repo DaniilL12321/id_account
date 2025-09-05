@@ -253,8 +253,8 @@ function SettingsContent() {
                 {themeMode === 'light'
                   ? 'Светлая'
                   : themeMode === 'dark'
-                  ? 'Тёмная'
-                  : 'Системная'}
+                    ? 'Тёмная'
+                    : 'Системная'}
               </ThemedText>
               <IconSymbol
                 name="chevron.right"
