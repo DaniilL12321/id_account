@@ -546,16 +546,13 @@ export default function HomeScreen() {
       let completedCount = 0;
       let debtsCount = 0;
 
-      const marksBySemester = data.reduce(
-        (acc, mark) => {
-          if (!acc[mark.semester]) {
-            acc[mark.semester] = [];
-          }
-          acc[mark.semester].push(mark);
-          return acc;
-        },
-        {} as Record<number, Mark[]>,
-      );
+      const marksBySemester = data.reduce((acc, mark) => {
+        if (!acc[mark.semester]) {
+          acc[mark.semester] = [];
+        }
+        acc[mark.semester].push(mark);
+        return acc;
+      }, {} as Record<number, Mark[]>);
 
       const lastSemester = Math.max(
         ...Object.keys(marksBySemester).map(Number),
@@ -687,9 +684,11 @@ export default function HomeScreen() {
 
   return (
     <Container>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <ScrollView
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.background }]}
           contentContainerStyle={[
             styles.scrollContent,
             { padding: 16, gap: 16, paddingBottom: 80 },
@@ -733,8 +732,8 @@ export default function HomeScreen() {
                   {upcomingExams.length === 1
                     ? 'экзамен'
                     : upcomingExams.length < 5
-                      ? 'экзамена'
-                      : 'экзаменов'}
+                    ? 'экзамена'
+                    : 'экзаменов'}
                 </ThemedText>
               </ThemedView>
 
@@ -792,10 +791,10 @@ export default function HomeScreen() {
                             {isPassed
                               ? 'Прошел'
                               : isToday
-                                ? 'Сегодня'
-                                : isTomorrow
-                                  ? 'Завтра'
-                                  : `${daysLeft} дн.`}
+                              ? 'Сегодня'
+                              : isTomorrow
+                              ? 'Завтра'
+                              : `${daysLeft} дн.`}
                           </ThemedText>
                         </ThemedView>
                         <IconSymbol
@@ -803,8 +802,8 @@ export default function HomeScreen() {
                             isPassed
                               ? 'checkmark.circle.fill'
                               : isToday
-                                ? 'exclamationmark.circle.fill'
-                                : 'calendar'
+                              ? 'exclamationmark.circle.fill'
+                              : 'calendar'
                           }
                           size={20}
                           color={color}

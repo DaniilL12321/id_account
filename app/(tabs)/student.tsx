@@ -281,7 +281,9 @@ export default function StudentProfileScreen() {
   if (loading || error || !userInfo || !userDetails) {
     return (
       <Container>
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+          style={[styles.container, { backgroundColor: theme.background }]}
+        >
           {loading ? (
             <StudentProfileSkeleton theme={theme} />
           ) : (
@@ -298,9 +300,11 @@ export default function StudentProfileScreen() {
 
   return (
     <Container>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
         <ScrollView
-          style={styles.scrollView}
+          style={[styles.scrollView, { backgroundColor: theme.background }]}
           contentContainerStyle={[
             styles.scrollContent,
             { padding: 16, gap: 16, paddingBottom: 80 },

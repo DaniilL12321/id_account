@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
 import React from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 
@@ -12,6 +13,25 @@ export default function TabLayout() {
   const { isDarkMode, themeMode } = useTheme();
   const colorScheme = isDarkMode ? 'dark' : 'light';
 
+  if (Platform.OS === 'ios') {
+    return (
+      <NativeTabs>
+        <NativeTabs.Trigger name="index">
+          <Label>Главная</Label>
+          <Icon sf="house.fill" />
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="student">
+          <Label>Студент</Label>
+          <Icon sf="person.fill" />
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="settings">
+          <Label>Настройки</Label>
+          <Icon sf="gearshape.fill" />
+        </NativeTabs.Trigger>
+      </NativeTabs>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Tabs
@@ -20,23 +40,8 @@ export default function TabLayout() {
           tabBarInactiveTintColor: '#8E8E93',
           headerShown: false,
           tabBarButton: HapticTab,
-          tabBarBackground:
-            Platform.OS === 'ios' ? TabBarBackground : undefined,
+          tabBarBackground: TabBarBackground,
           tabBarStyle: Platform.select({
-            ios: {
-              position: 'absolute',
-              backgroundColor:
-                themeMode === 'system'
-                  ? isDarkMode
-                    ? '#000000'
-                    : '#FFFFFF'
-                  : themeMode === 'dark'
-                    ? '#000000'
-                    : '#FFFFFF',
-              borderTopWidth: 0,
-              elevation: 0,
-              shadowOpacity: 0,
-            },
             web: {
               position: 'fixed',
               bottom: 0,
