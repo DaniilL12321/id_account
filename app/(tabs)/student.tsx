@@ -566,6 +566,7 @@ export default function StudentProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: -34,
     width: '100%',
   } as ViewStyle,
   scrollView: {
