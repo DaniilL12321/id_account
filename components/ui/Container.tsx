@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewProps, Platform } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
 interface ContainerProps extends ViewProps {
   children: React.ReactNode;
@@ -13,15 +14,15 @@ export function Container({ children, style, ...props }: ContainerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{ container: ViewStyle; content: ViewStyle }>({
   container: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
     ...Platform.select({
       web: {
-        overflow: 'auto',
-        height: '100vh',
+        overflow: 'scroll',
+        height: '100%',
       },
     }),
   },

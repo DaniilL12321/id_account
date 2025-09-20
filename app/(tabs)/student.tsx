@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Platform,
   ScrollView,
-  SafeAreaView,
   Image,
   TouchableOpacity,
   View,
@@ -10,6 +9,7 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
