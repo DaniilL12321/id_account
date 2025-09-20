@@ -20,7 +20,7 @@
 <div align="center">
   <div style="display: flex; gap: 10px; overflow-x: auto; padding: 20px;">
     <img src="https://github.com/user-attachments/assets/a113069f-c561-460e-803b-31d9cb44b692" alt="Мобильный скриншот 4" width="200"/>
-    <img src="https://github.com/user-attachments/assets/6af4c430-cd89-4cf5-9493-e73f6a8a2903" alt="Мобильный скриншот 1" width="200"/>
+    <img src="https://github.com/user-attachments/assets/47dc6810-c30e-4f5a-96ad-bfc510deb0a9" alt="Мобильный скриншот 1" width="200"/>
     <img src="https://github.com/user-attachments/assets/d5ffbafe-df95-4b7a-8dd3-348e074ec5f0" alt="Мобильный скриншот 2" width="200"/>
     <img src="https://github.com/user-attachments/assets/d7a8402d-a4e3-44fb-acd8-fd2c5ddb1bab" alt="Мобильный скриншот 3" width="200"/>
     <img src="https://github.com/user-attachments/assets/8266229c-61b1-4223-b730-badc8cbaeed6" alt="Мобильный скриншот 4" width="200"/>
