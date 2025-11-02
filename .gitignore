@@ -42,5 +42,3 @@ app-example
 expo.app.config.ts
 
 .vscode
-
-yarn.lock

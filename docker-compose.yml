@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+    web:
+        build:
+            context: .
+            args:
+                - OAUTH_URL=${OAUTH_URL}
+                - API_URL=${API_URL}
+                - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+                - OAUTH_SCOPE=${OAUTH_SCOPE}
+                - BUILD_DATE=${BUILD_DATE}
+        ports:
+            - '3000:80'
+        environment:
+            - NODE_ENV=production
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+
+    dev:
+        build:
+            context: .
+            target: builder
+            args:
+                - OAUTH_URL=${OAUTH_URL}
+                - API_URL=${API_URL}
+                - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+                - OAUTH_SCOPE=${OAUTH_SCOPE}
+                - BUILD_DATE=${BUILD_DATE}
+        ports:
+            - '19006:19006'
+        volumes:
+            - .:/app
+            - /app/node_modules
+        environment:
+            - NODE_ENV=development
+            - OAUTH_URL=${OAUTH_URL}
+            - API_URL=${API_URL}
+            - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+            - OAUTH_SCOPE=${OAUTH_SCOPE}
+            - BUILD_DATE=${BUILD_DATE}
+        command: yarn web
+        profiles:
+            - dev

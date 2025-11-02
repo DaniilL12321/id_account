@@ -8,8 +8,12 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "web:build": "expo export -p web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up",
+    "docker:dev": "docker-compose --profile dev up"
   },
   "jest": {
     "preset": "jest-expo"
